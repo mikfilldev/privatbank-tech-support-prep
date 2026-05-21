@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>web1.lab.vbox — Lab Status</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 web1.lab.vbox</h1>
+            <p class="subtitle">Virtual Lab Dashboard</p>
+        </header>
+
+        <div class="cards">
+            <div class="card" data-service="web">
+                <div class="card-header">
+                    <span class="indicator" id="web-indicator"></span>
+                    <h2>WEB</h2>
+                </div>
+                <div class="card-body">
+                    <p class="host">web1.lab.vbox</p>
+                    <p class="ip">192.168.56.11</p>
+                    <p class="status-text" id="web-status">Checking...</p>
+
+                    <div class="metric">
+                        <span class="metric-label">RAM</span>
+                        <div class="metric-bar"><div class="metric-fill" id="web-ram-bar"></div></div>
+                        <span class="metric-value" id="web-ram-text">—</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">DSK</span>
+                        <div class="metric-bar"><div class="metric-fill" id="web-dsk-bar"></div></div>
+                        <span class="metric-value" id="web-dsk-text">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">CPU</span>
+                        <span id="web-load-text">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">UP</span>
+                        <span id="web-uptime">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">NGX</span>
+                        <span id="web-nginx-text">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" data-service="db">
+                <div class="card-header">
+                    <span class="indicator" id="db-indicator"></span>
+                    <h2>DB</h2>
+                </div>
+                <div class="card-body">
+                    <p class="host">db1.lab.vbox</p>
+                    <p class="ip">192.168.56.12</p>
+                    <p class="status-text" id="db-status">Checking...</p>
+
+                    <div class="metric">
+                        <span class="metric-label">RAM</span>
+                        <div class="metric-bar"><div class="metric-fill" id="db-ram-bar"></div></div>
+                        <span class="metric-value" id="db-ram-text">—</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">DSK</span>
+                        <div class="metric-bar"><div class="metric-fill" id="db-dsk-bar"></div></div>
+                        <span class="metric-value" id="db-dsk-text">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">CPU</span>
+                        <span id="db-load-text">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">UP</span>
+                        <span id="db-uptime">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">PG</span>
+                        <span id="db-pg-text">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" data-service="dns">
+                <div class="card-header">
+                    <span class="indicator" id="dns-indicator"></span>
+                    <h2>DNS</h2>
+                </div>
+                <div class="card-body">
+                    <p class="host">dns.lab.vbox</p>
+                    <p class="ip">192.168.56.5</p>
+                    <p class="status-text" id="dns-status">Checking...</p>
+
+                    <div class="metric">
+                        <span class="metric-label">RAM</span>
+                        <div class="metric-bar"><div class="metric-fill" id="dns-ram-bar"></div></div>
+                        <span class="metric-value" id="dns-ram-text">—</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">DSK</span>
+                        <div class="metric-bar"><div class="metric-fill" id="dns-dsk-bar"></div></div>
+                        <span class="metric-value" id="dns-dsk-text">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">CPU</span>
+                        <span id="dns-load-text">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">UP</span>
+                        <span id="dns-uptime">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">BIND</span>
+                        <span id="dns-bind-text">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" data-service="sql">
+                <div class="card-header">
+                    <span class="indicator" id="sql-indicator"></span>
+                    <h2>SQL</h2>
+                </div>
+                <div class="card-body">
+                    <p class="host">practice_db (PostgreSQL)</p>
+                    <p class="ip" id="sql-info">5 tables · examples</p>
+                    <p class="status-text" id="sql-status">Checking...</p>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Query</span>
+                        <select id="sql-query-select" style="flex:1;background:rgba(255,255,255,0.08);color:#e0e0e0;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:4px 8px;font-size:0.75rem;">
+                            <option value="0">Employees + Departments</option>
+                            <option value="1">Dept avg salary</option>
+                            <option value="2">Above dept avg</option>
+                            <option value="3">Top spenders (CTE)</option>
+                            <option value="4">Window rank depts</option>
+                            <option value="5">Running total</option>
+                            <option value="7">Products never ordered</option>
+                            <option value="8">Top employees by spend</option>
+                            <option value="9">Pending orders value</option>
+                        </select>
+                    </div>
+                    <div class="metric-row">
+                        <button id="sql-run-btn" style="width:100%;margin-top:6px;background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.3);border-radius:8px;padding:6px;cursor:pointer;font-size:0.8rem;">▶ Run Query</button>
+                    </div>
+                    <pre id="sql-result" style="margin-top:8px;font-size:0.7rem;background:rgba(0,0,0,0.3);border-radius:6px;padding:8px;max-height:180px;overflow-y:auto;white-space:pre-wrap;color:#aaaacc;"></pre>
+                </div>
+            </div>
+
+            <div class="card" data-service="redis">
+                <div class="card-header">
+                    <span class="indicator" id="redis-indicator"></span>
+                    <h2>Redis</h2>
+                </div>
+                <div class="card-body">
+                    <p class="host">srv3.lab.vbox</p>
+                    <p class="ip">192.168.56.13</p>
+                    <p class="status-text" id="redis-status">Checking...</p>
+
+                    <div class="metric">
+                        <span class="metric-label">RAM</span>
+                        <div class="metric-bar"><div class="metric-fill" id="redis-ram-bar"></div></div>
+                        <span class="metric-value" id="redis-ram-text">—</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">DSK</span>
+                        <div class="metric-bar"><div class="metric-fill" id="redis-dsk-bar"></div></div>
+                        <span class="metric-value" id="redis-dsk-text">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">CPU</span>
+                        <span id="redis-load-text">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">UP</span>
+                        <span id="redis-uptime">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Keys</span>
+                        <span id="redis-keys">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Hit</span>
+                        <span id="redis-hit">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" data-service="elk">
+                <div class="card-header">
+                    <span class="indicator" id="elk-indicator"></span>
+                    <h2>ELK</h2>
+                </div>
+                <div class="card-body">
+                    <p class="host">elk.lab.vbox</p>
+                    <p class="ip">192.168.56.14</p>
+                    <p class="status-text" id="elk-status">Checking...</p>
+                    <div class="metric-row" style="margin-top:4px;">
+                        <span class="metric-label">ES</span>
+                        <span id="elk-es-status" style="color:#aaaacc;">—</span>
+                    </div>
+                    <div class="metric-row" style="margin-top:4px;">
+                        <a href="/api/kibana/" target="_blank" style="display:block;width:100%;text-align:center;background:rgba(0,119,204,0.15);color:#0077cc;border:1px solid rgba(0,119,204,0.3);border-radius:8px;padding:8px;text-decoration:none;font-size:0.85rem;">🔍 Open Kibana</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" data-service="grafana">
+                <div class="card-header">
+                    <span class="indicator" id="grafana-indicator"></span>
+                    <h2>Grafana</h2>
+                </div>
+                <div class="card-body">
+                    <p class="host">grafana.lab.vbox</p>
+                    <p class="ip">192.168.56.15</p>
+                    <p class="status-text" id="grafana-status">Checking...</p>
+                    <div class="metric-row" style="margin-top:8px;">
+                        <a href="/api/grafana/" target="_blank" style="display:block;width:100%;text-align:center;background:rgba(247,149,51,0.15);color:#f79533;border:1px solid rgba(247,149,51,0.3);border-radius:8px;padding:8px;text-decoration:none;font-size:0.85rem;">📊 Open Grafana</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Last checked: <span id="last-checked">—</span></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
