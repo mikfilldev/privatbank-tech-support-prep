@@ -5,8 +5,7 @@ export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 
 apt-get update
-apt-get install -y redis-server python3 python3-pip
-pip3 install redis
+apt-get install -y redis-server python3 python3-redis python3-pip
 
 REDIS_PASSWORD=$(cat /vagrant/secrets/redis_password.txt 2>/dev/null || echo "")
 
