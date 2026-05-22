@@ -178,6 +178,6 @@ systemctl enable grafana-server
 systemctl start grafana-server
 
 # Run config in background (grafana needs to be running first)
-/tmp/configure-grafana.sh &
+nohup /tmp/configure-grafana.sh < /dev/null > /var/log/grafana-setup.log 2>&1 & disown
 
 echo "Grafana ready: http://192.168.200.15:3000 (admin / password from secrets/grafana_password.txt)"

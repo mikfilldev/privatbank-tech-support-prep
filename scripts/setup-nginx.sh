@@ -160,7 +160,7 @@ PYEOF
 
 chmod +x /usr/local/bin/metrics-web.py
 pkill -f metrics-web.py 2>/dev/null; sleep 1
-nohup python3 /usr/local/bin/metrics-web.py > /var/log/metrics-web.log 2>&1 &
+nohup python3 /usr/local/bin/metrics-web.py < /dev/null > /var/log/metrics-web.log 2>&1 & disown
 
 cp -r /vagrant/web/* /var/www/html/
 

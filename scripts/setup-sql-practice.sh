@@ -324,6 +324,6 @@ PYEOF
 
 chmod +x /usr/local/bin/sql-practice-server.py
 pkill -f sql-practice-server.py 2>/dev/null; sleep 1
-nohup python3 /usr/local/bin/sql-practice-server.py > /var/log/sql-practice.log 2>&1 &
+nohup python3 /usr/local/bin/sql-practice-server.py < /dev/null > /var/log/sql-practice.log 2>&1 & disown
 
 echo "SQL practice ready: db=practice_db, api=127.0.0.1:8082"
