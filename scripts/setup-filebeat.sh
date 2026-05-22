@@ -4,6 +4,13 @@ set -e
 ELK_IP="192.168.200.14"
 VERSION="8.17.3"
 
+# Install prerequisites (tar may be missing on minimal boxes like Oracle Linux)
+if command -v dnf &>/dev/null; then
+  dnf install -y tar wget
+elif command -v apt &>/dev/null; then
+  apt-get install -y tar wget
+fi
+
 # Install Filebeat
 cd /tmp
 if [ ! -f "filebeat-${VERSION}-linux-x86_64.tar.gz" ]; then
