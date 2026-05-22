@@ -319,7 +319,7 @@ class SQLPracticeHandler(http.server.BaseHTTPRequestHandler):
 
     def log_message(self, *a): pass
 
-http.server.HTTPServer(("127.0.0.1", 8082), SQLPracticeHandler).serve_forever()
+http.server.HTTPServer(("0.0.0.0", 8082), SQLPracticeHandler).serve_forever()
 PYEOF
 
 chmod +x /usr/local/bin/sql-practice-server.py
