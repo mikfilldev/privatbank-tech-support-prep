@@ -2,7 +2,8 @@
 set -e
 
 apt-get update
-apt-get install -y redis-server python3
+apt-get install -y redis-server python3 python3-pip
+pip3 install redis
 
 REDIS_PASSWORD=$(cat /vagrant/secrets/redis_password.txt 2>/dev/null || echo "")
 
