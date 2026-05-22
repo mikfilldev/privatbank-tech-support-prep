@@ -63,6 +63,18 @@ Vagrant.configure("2") do |config|
     g.vm.provision "shell", path: "scripts/setup-filebeat.sh"
   end
 
+  config.vm.define "zabbix" do |z|
+    z.vm.hostname = "zabbix"
+    z.vm.network "private_network", ip: "192.168.200.16"
+    z.vm.provider "virtualbox" do |vb|
+      vb.memory = 2048
+      vb.cpus = 2
+    end
+    z.vm.provision "shell", path: "scripts/setup-dns.sh"
+    z.vm.provision "shell", path: "scripts/setup-zabbix.sh"
+    z.vm.provision "shell", path: "scripts/setup-filebeat.sh"
+  end
+
   config.vm.define "db1" do |db|
     db.vm.hostname = "db1"
     db.vm.network "private_network", ip: "192.168.200.12"

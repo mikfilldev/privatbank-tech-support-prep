@@ -93,6 +93,12 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
+
+    location /api/zabbix/ {
+        proxy_pass http://192.168.200.16/zabbix/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
 }
 NGINX
 

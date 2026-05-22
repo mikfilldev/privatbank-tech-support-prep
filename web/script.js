@@ -157,6 +157,14 @@ async function checkGrafana() {
     } catch { setStatus('grafana', 'offline', 'Offline'); }
 }
 
+async function checkZabbix() {
+    try {
+        const res = await fetch('/api/zabbix/', { signal: AbortSignal.timeout(5000) });
+        if (res.status !== 200) { setStatus('zabbix', 'offline', 'Offline'); return; }
+        setStatus('zabbix', 'online', 'Apache + PHP');
+    } catch { setStatus('zabbix', 'offline', 'Offline'); }
+}
+
 async function checkAll() {
     const now = new Date().toLocaleTimeString();
 
@@ -168,7 +176,7 @@ async function checkAll() {
         } catch { setStatus(check.id, 'offline', 'Offline'); }
     }
 
-    await Promise.all([checkWebMetrics(), checkDbMetrics(), checkDnsMetrics(), checkSqlStatus(), checkGrafana(), checkRedis(), checkRedisMetrics(), checkElk()]);
+    await Promise.all([checkWebMetrics(), checkDbMetrics(), checkDnsMetrics(), checkSqlStatus(), checkGrafana(), checkRedis(), checkRedisMetrics(), checkElk(), checkZabbix()]);
 
     $('last-checked').textContent = now;
 }

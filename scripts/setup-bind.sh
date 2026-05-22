@@ -41,6 +41,7 @@ db1     IN  A   192.168.200.12
 srv3    IN  A   192.168.200.13
 elk     IN  A   192.168.200.14
 grafana IN  A   192.168.200.15
+zabbix  IN  A   192.168.200.16
 EOF
 
 cat > /var/named/200.168.192.zone << 'EOF'
@@ -59,6 +60,7 @@ $TTL 86400
 13  IN  PTR srv3.privatbank.local.
 14  IN  PTR elk.privatbank.local.
 15  IN  PTR grafana.privatbank.local.
+16  IN  PTR zabbix.privatbank.local.
 EOF
 
 chown -R named:named /var/named

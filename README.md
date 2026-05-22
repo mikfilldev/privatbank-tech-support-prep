@@ -11,6 +11,7 @@
 | `srv3` | 192.168.200.13 | NoSQL | Redis (sessions, cache, rate-limiting, leaderboard) |
 | `elk` | 192.168.200.14 | Логування | Elasticsearch + Kibana + Filebeat (лог-централізація) |
 | `grafana` | 192.168.200.15 | Моніторинг | Grafana (дашборди з PostgreSQL) |
+| `zabbix` | 192.168.200.16 | Моніторинг | Zabbix (сервер + фронтенд + агент) |
 
 ---
 
@@ -129,7 +130,7 @@ vagrant up
 192.168.200.12 db1.privatbank.local
 192.168.200.13 srv3.privatbank.local
 192.168.200.14 elk.privatbank.local
-192.168.200.15 grafana.privatbank.local
+192.168.200.16 zabbix.privatbank.local
 ```
 
 ---
@@ -146,6 +147,7 @@ vagrant up
 | `/api/redis/` | `192.168.200.13:8080` |
 | `/api/kibana/` | `192.168.200.14:5601` |
 | `/api/grafana/` | `192.168.200.15:3000` |
+| `/api/zabbix/` | `192.168.200.16/zabbix` |
 
 ---
 
