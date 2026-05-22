@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+
 ELK_IP="192.168.200.14"
 VERSION="8.17.3"
 

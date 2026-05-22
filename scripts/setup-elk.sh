@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+
 JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
 ES_VERSION="8.17.3"
 

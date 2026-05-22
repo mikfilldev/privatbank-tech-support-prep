@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+
 SQL_REF="/usr/local/share/sql-practice"
 
 # ─── Create practice database ───

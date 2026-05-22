@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+
 # Install Grafana
 apt-get update
 apt-get install -y gnupg2 software-properties-common wget
