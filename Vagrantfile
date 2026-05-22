@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
       dns.vm.box = "oraclelinux/10"
       dns.vm.box_url = "https://oracle.github.io/vagrant-projects/boxes/oraclelinux/10.json"
       dns.vm.hostname = "dns"
-      dns.vm.network "private_network", ip: "192.168.56.5"
+      dns.vm.network "private_network", ip: "192.168.200.5"
       dns.vm.provider "virtualbox" do |vb|
         vb.memory = 512
         vb.cpus = 1
@@ -18,7 +18,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "web1" do |web|
     web.vm.hostname = "web1"
-    web.vm.network "private_network", ip: "192.168.56.11"
+    web.vm.network "private_network", ip: "192.168.200.11"
     web.vm.provider "virtualbox" do |vb|
       vb.memory = 1024
       vb.cpus = 1
@@ -30,7 +30,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "srv3" do |srv|
     srv.vm.hostname = "srv3"
-    srv.vm.network "private_network", ip: "192.168.56.13"
+    srv.vm.network "private_network", ip: "192.168.200.13"
     srv.vm.provider "virtualbox" do |vb|
       vb.memory = 512
       vb.cpus = 1
@@ -42,7 +42,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "elk" do |elk|
     elk.vm.hostname = "elk"
-    elk.vm.network "private_network", ip: "192.168.56.14"
+    elk.vm.network "private_network", ip: "192.168.200.14"
     elk.vm.provider "virtualbox" do |vb|
       vb.memory = 2048
       vb.cpus = 2
@@ -53,7 +53,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "grafana" do |g|
     g.vm.hostname = "grafana"
-    g.vm.network "private_network", ip: "192.168.56.15"
+    g.vm.network "private_network", ip: "192.168.200.15"
     g.vm.provider "virtualbox" do |vb|
       vb.memory = 1024
       vb.cpus = 1
@@ -65,7 +65,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "db1" do |db|
     db.vm.hostname = "db1"
-    db.vm.network "private_network", ip: "192.168.56.12"
+    db.vm.network "private_network", ip: "192.168.200.12"
     db.vm.provider "virtualbox" do |vb|
       vb.memory = 1024
       vb.cpus = 1

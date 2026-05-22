@@ -39,19 +39,19 @@ server {
     }
 
     location /api/health/db {
-        proxy_pass http://192.168.56.12:8080/;
+        proxy_pass http://192.168.200.12:8080/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 
     location /api/health/dns {
-        proxy_pass http://192.168.56.5:8083/;
+        proxy_pass http://192.168.200.5:8083/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 
     location /api/health/db-metrics {
-        proxy_pass http://192.168.56.12:8081/;
+        proxy_pass http://192.168.200.12:8081/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
@@ -63,33 +63,33 @@ server {
     }
 
     location /api/health/dns-metrics {
-        resolver 192.168.56.5 valid=10s;
-        set $dns_metrics_target http://192.168.56.5:8083/;
+        resolver 192.168.200.5 valid=10s;
+        set $dns_metrics_target http://192.168.200.5:8083/;
         proxy_pass $dns_metrics_target;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 
     location /api/sql-practice/ {
-        proxy_pass http://192.168.56.12:8082/;
+        proxy_pass http://192.168.200.12:8082/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 
     location /api/grafana/ {
-        proxy_pass http://192.168.56.15:3000/;
+        proxy_pass http://192.168.200.15:3000/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 
     location /api/redis/ {
-        proxy_pass http://192.168.56.13:8080/;
+        proxy_pass http://192.168.200.13:8080/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 
     location /api/kibana/ {
-        proxy_pass http://192.168.56.14:5601/;
+        proxy_pass http://192.168.200.14:5601/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }

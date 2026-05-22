@@ -43,7 +43,7 @@ curl -s -X POST http://admin:admin@localhost:3000/api/datasources \
   -d '{
     "name":"PostgreSQL (labdb)",
     "type":"postgres",
-    "url":"192.168.56.12:5432",
+    "url":"192.168.200.12:5432",
     "access":"proxy",
     "user":"labuser",
     "database":"labdb",
@@ -62,7 +62,7 @@ curl -s -X POST http://admin:admin@localhost:3000/api/datasources \
   -d '{
     "name":"PostgreSQL (practice_db)",
     "type":"postgres",
-    "url":"192.168.56.12:5432",
+    "url":"192.168.200.12:5432",
     "access":"proxy",
     "user":"postgres",
     "database":"practice_db",
@@ -173,4 +173,4 @@ systemctl start grafana-server
 # Run config in background (grafana needs to be running first)
 /tmp/configure-grafana.sh &
 
-echo "Grafana ready: http://192.168.56.15:3000 (admin/admin)"
+echo "Grafana ready: http://192.168.200.15:3000 (admin/admin)"

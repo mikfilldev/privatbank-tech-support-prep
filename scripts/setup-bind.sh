@@ -19,9 +19,9 @@ zone "privatbank.local" IN {
     file "privatbank.local.zone";
 };
 
-zone "56.168.192.in-addr.arpa" IN {
+zone "200.168.192.in-addr.arpa" IN {
     type master;
-    file "56.168.192.zone";
+    file "200.168.192.zone";
 };
 EOF
 
@@ -35,15 +35,15 @@ $TTL 86400
         86400 )
     IN  NS  dns.privatbank.local.
 
-dns     IN  A   192.168.56.5
-web1    IN  A   192.168.56.11
-db1     IN  A   192.168.56.12
-srv3    IN  A   192.168.56.13
-elk     IN  A   192.168.56.14
-grafana IN  A   192.168.56.15
+dns     IN  A   192.168.200.5
+web1    IN  A   192.168.200.11
+db1     IN  A   192.168.200.12
+srv3    IN  A   192.168.200.13
+elk     IN  A   192.168.200.14
+grafana IN  A   192.168.200.15
 EOF
 
-cat > /var/named/56.168.192.zone << 'EOF'
+cat > /var/named/200.168.192.zone << 'EOF'
 $TTL 86400
 @   IN  SOA dns.privatbank.local. admin.privatbank.local. (
         2025051701
@@ -62,7 +62,7 @@ $TTL 86400
 EOF
 
 chown -R named:named /var/named
-chmod 640 /var/named/privatbank.local.zone /var/named/56.168.192.zone
+chmod 640 /var/named/privatbank.local.zone /var/named/200.168.192.zone
 
 firewall-cmd --add-service=dns --permanent
 firewall-cmd --reload

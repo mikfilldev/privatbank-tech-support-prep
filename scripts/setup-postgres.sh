@@ -14,11 +14,11 @@ SQL
 
 # Listen on localhost + private network
 PG_CONF=$(find /etc/postgresql -name postgresql.conf | head -1)
-sed -i "s/^#listen_addresses = 'localhost'/listen_addresses = 'localhost,192.168.56.12'/" "$PG_CONF"
+sed -i "s/^#listen_addresses = 'localhost'/listen_addresses = 'localhost,192.168.200.12'/" "$PG_CONF"
 
 # Allow connections from lab network
 PG_HBA=$(find /etc/postgresql -name pg_hba.conf | head -1)
-echo "host labdb labuser 192.168.56.0/24 md5" >> "$PG_HBA"
+echo "host labdb labuser 192.168.200.0/24 md5" >> "$PG_HBA"
 
 systemctl restart postgresql
 

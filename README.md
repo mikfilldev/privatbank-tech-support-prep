@@ -5,12 +5,12 @@
 
 | VM | IP | Роль | Технології |
 |----|----|------|------------|
-| `dns` | 192.168.56.5 | DNS-сервер | BIND, Oracle Linux 10 |
-| `web1` | 192.168.56.11 | Веб-сервер | nginx, Grafana, dashboard |
-| `db1` | 192.168.56.12 | PostgreSQL | SQL (labdb + practice_db), health/metrics API |
-| `srv3` | 192.168.56.13 | NoSQL | Redis (sessions, cache, rate-limiting, leaderboard) |
-| `elk` | 192.168.56.14 | Логування | Elasticsearch + Kibana + Filebeat (лог-централізація) |
-| `grafana` | 192.168.56.15 | Моніторинг | Grafana (дашборди з PostgreSQL) |
+| `dns` | 192.168.200.5 | DNS-сервер | BIND, Oracle Linux 10 |
+| `web1` | 192.168.200.11 | Веб-сервер | nginx, Grafana, dashboard |
+| `db1` | 192.168.200.12 | PostgreSQL | SQL (labdb + practice_db), health/metrics API |
+| `srv3` | 192.168.200.13 | NoSQL | Redis (sessions, cache, rate-limiting, leaderboard) |
+| `elk` | 192.168.200.14 | Логування | Elasticsearch + Kibana + Filebeat (лог-централізація) |
+| `grafana` | 192.168.200.15 | Моніторинг | Grafana (дашборди з PostgreSQL) |
 
 ---
 
@@ -124,12 +124,12 @@ vagrant up
 ### Hosts file (C:\Windows\System32\drivers\etc\hosts)
 
 ```
-192.168.56.5  dns.privatbank.local
-192.168.56.11 web1.privatbank.local
-192.168.56.12 db1.privatbank.local
-192.168.56.13 srv3.privatbank.local
-192.168.56.14 elk.privatbank.local
-192.168.56.15 grafana.privatbank.local
+192.168.200.5  dns.privatbank.local
+192.168.200.11 web1.privatbank.local
+192.168.200.12 db1.privatbank.local
+192.168.200.13 srv3.privatbank.local
+192.168.200.14 elk.privatbank.local
+192.168.200.15 grafana.privatbank.local
 ```
 
 ---
@@ -138,14 +138,14 @@ vagrant up
 
 | URL | Upstream |
 |-----|----------|
-| `/api/health/db` | `192.168.56.12:8080` |
-| `/api/health/db-metrics` | `192.168.56.12:8081` |
+| `/api/health/db` | `192.168.200.12:8080` |
+| `/api/health/db-metrics` | `192.168.200.12:8081` |
 | `/api/health/web-metrics` | `127.0.0.1:8082` |
-| `/api/health/dns-metrics` | `192.168.56.5:8083` |
-| `/api/sql-practice/` | `192.168.56.12:8082` |
-| `/api/redis/` | `192.168.56.13:8080` |
-| `/api/kibana/` | `192.168.56.14:5601` |
-| `/api/grafana/` | `192.168.56.15:3000` |
+| `/api/health/dns-metrics` | `192.168.200.5:8083` |
+| `/api/sql-practice/` | `192.168.200.12:8082` |
+| `/api/redis/` | `192.168.200.13:8080` |
+| `/api/kibana/` | `192.168.200.14:5601` |
+| `/api/grafana/` | `192.168.200.15:3000` |
 
 ---
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-ELK_IP="192.168.56.14"
+ELK_IP="192.168.200.14"
 VERSION="8.17.3"
 
 # Install Filebeat
@@ -106,7 +106,7 @@ fi
 # Output to Elasticsearch
 cat >> /etc/filebeat/filebeat.yml << 'OUTPUT'
 output.elasticsearch:
-  hosts: ["192.168.56.14:9200"]
+  hosts: ["192.168.200.14:9200"]
 OUTPUT
 
 # systemd unit

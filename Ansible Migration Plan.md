@@ -27,7 +27,7 @@ Vagrant Lab/
 │       │   ├── templates/
 │       │   │   ├── named.conf.j2
 │       │   │   ├── privatbank.local.zone.j2
-│       │   │   └── 56.168.192.zone.j2
+│       │   │   └── 200.168.192.zone.j2
 │       │   └── files/
 │       │       └── metrics-dns.service
 │       ├── nginx/
@@ -85,7 +85,7 @@ gathering = explicit
       command: resolvectl domain eth1 {{ domain }}
       changed_when: false
   vars:
-    dns_ip: 192.168.56.5
+    dns_ip: 192.168.200.5
     domain: privatbank.local
 ```
 
@@ -227,7 +227,7 @@ ansible/roles/dns_server/
 ├── templates/
 │   ├── named.conf.j2
 │   ├── privatbank.local.zone.j2
-│   └── 56.168.192.zone.j2
+│   └── 200.168.192.zone.j2
 ├── files/
 │   └── metrics-dns.service
 └── vars/
@@ -258,8 +258,8 @@ ansible/roles/dns_server/
 
 - name: Deploy reverse zone
   template:
-    src: 56.168.192.zone.j2
-    dest: /var/named/56.168.192.zone
+    src: 200.168.192.zone.j2
+    dest: /var/named/200.168.192.zone
   notify: restart named
 
 - name: Set zone file permissions
@@ -270,7 +270,7 @@ ansible/roles/dns_server/
     mode: '0640'
   loop:
     - /var/named/privatbank.local.zone
-    - /var/named/56.168.192.zone
+    - /var/named/200.168.192.zone
 
 - name: Open firewall for DNS
   firewalld:
@@ -305,9 +305,9 @@ zone "{{ domain }}" IN {
     file "privatbank.local.zone";
 };
 
-zone "56.168.192.in-addr.arpa" IN {
+zone "200.168.192.in-addr.arpa" IN {
     type master;
-    file "56.168.192.zone";
+    file "200.168.192.zone";
 };
 ```
 
@@ -399,7 +399,7 @@ Vagrant.configure("2") do |config|
     dns.vm.box = "oraclelinux/10"
     dns.vm.box_url = "https://oracle.github.io/vagrant-projects/boxes/oraclelinux/10.json"
     dns.vm.hostname = "dns"
-    dns.vm.network "private_network", ip: "192.168.56.5"
+    dns.vm.network "private_network", ip: "192.168.200.5"
     dns.vm.provider "virtualbox" do |vb|
       vb.memory = 512
       vb.cpus = 1
@@ -414,7 +414,7 @@ Vagrant.configure("2") do |config|
   # --- web1: Nginx ---
   config.vm.define "web1" do |web|
     web.vm.hostname = "web1"
-    web.vm.network "private_network", ip: "192.168.56.11"
+    web.vm.network "private_network", ip: "192.168.200.11"
     web.vm.provider "virtualbox" do |vb|
       vb.memory = 1024
       vb.cpus = 1
@@ -425,7 +425,7 @@ Vagrant.configure("2") do |config|
       ansible.provisioning_path = "/vagrant/ansible"
       ansible.extra_vars = {
         domain: "privatbank.local",
-        dns_ip: "192.168.56.5",
+        dns_ip: "192.168.200.5",
       }
     end
   end
@@ -433,7 +433,7 @@ Vagrant.configure("2") do |config|
   # --- db1: PostgreSQL ---
   config.vm.define "db1" do |db|
     db.vm.hostname = "db1"
-    db.vm.network "private_network", ip: "192.168.56.12"
+    db.vm.network "private_network", ip: "192.168.200.12"
     db.vm.provider "virtualbox" do |vb|
       vb.memory = 1024
       vb.cpus = 1

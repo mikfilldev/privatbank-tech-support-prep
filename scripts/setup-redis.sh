@@ -6,7 +6,7 @@ apt-get install -y redis-server python3
 
 # Configure Redis for private network
 cat > /etc/redis/redis.conf << 'REDIS'
-bind 127.0.0.1 192.168.56.13
+bind 127.0.0.1 192.168.200.13
 port 6379
 daemonize no
 supervised systemd
@@ -38,7 +38,7 @@ r.set('counter:errors_404', 42)
 
 # Rate limiting example
 for i in range(100):
-    r.setex(f'rate_limit:192.168.56.{random.randint(1,254)}', 60, 1)
+    r.setex(f'rate_limit:192.168.200.{random.randint(1,254)}', 60, 1)
 
 # Cached query results (like a materialized view)
 r.setex('cache:dept_budgets', 300, json.dumps([
@@ -153,4 +153,4 @@ chmod +x /usr/local/bin/redis-server.py
 pkill -f redis-server.py 2>/dev/null; sleep 1
 nohup python3 /usr/local/bin/redis-server.py > /var/log/redis-api.log 2>&1 &
 
-echo "Redis ready: 192.168.56.13:6379, API on :8080"
+echo "Redis ready: 192.168.200.13:6379, API on :8080"
