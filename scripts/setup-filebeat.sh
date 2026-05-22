@@ -17,7 +17,7 @@ if [ ! -f "filebeat-${VERSION}-linux-x86_64.tar.gz" ]; then
   wget -q "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${VERSION}-linux-x86_64.tar.gz"
 fi
 tar -xzf "filebeat-${VERSION}-linux-x86_64.tar.gz"
-mv "filebeat-${VERSION}" /usr/share/filebeat
+mv "filebeat-${VERSION}-linux-x86_64" /usr/share/filebeat
 
 # Create filebeat user
 id -u filebeat &>/dev/null || useradd -m -s /bin/bash filebeat
