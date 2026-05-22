@@ -39,10 +39,13 @@ DebugLevel=3
 ZBXSRV
 
 # Configure PHP for frontend
-sed -i 's/^post_max_size.*/post_max_size = 16M/' /etc/php/*/apache2/php.ini
-sed -i 's/^max_execution_time.*/max_execution_time = 300/' /etc/php/*/apache2/php.ini
-sed -i 's/^max_input_time.*/max_input_time = 300/' /etc/php/*/apache2/php.ini
-sed -i 's/^;date.timezone.*/date.timezone = Europe\/Kyiv/' /etc/php/*/apache2/php.ini
+PHP_INI=$(find /etc/php -name php.ini -path "*/apache2/*" 2>/dev/null | head -1)
+if [ -n "$PHP_INI" ]; then
+  sed -i 's/^post_max_size.*/post_max_size = 16M/' "$PHP_INI"
+  sed -i 's/^max_execution_time.*/max_execution_time = 300/' "$PHP_INI"
+  sed -i 's/^max_input_time.*/max_input_time = 300/' "$PHP_INI"
+  sed -i 's/^;date.timezone.*/date.timezone = Europe\/Kyiv/' "$PHP_INI"
+fi
 
 # Configure Apache for Zabbix
 cat > /etc/apache2/conf-available/zabbix.conf << APACHE
