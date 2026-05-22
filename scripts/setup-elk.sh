@@ -17,7 +17,7 @@ if [ ! -f "elasticsearch-${ES_VERSION}-linux-x86_64.tar.gz" ]; then
   wget -q "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}-linux-x86_64.tar.gz"
 fi
 tar -xzf "elasticsearch-${ES_VERSION}-linux-x86_64.tar.gz"
-mv "elasticsearch-${ES_VERSION}-linux-x86_64" /usr/share/elasticsearch
+mv "elasticsearch-${ES_VERSION}" /usr/share/elasticsearch
 
 # Create elasticsearch user
 id -u elasticsearch &>/dev/null || useradd -m -s /bin/bash elasticsearch
@@ -71,7 +71,7 @@ if [ ! -f "kibana-${KIBANA_VERSION}-linux-x86_64.tar.gz" ]; then
   wget -q "https://artifacts.elastic.co/downloads/kibana/kibana-${KIBANA_VERSION}-linux-x86_64.tar.gz"
 fi
 tar -xzf "kibana-${KIBANA_VERSION}-linux-x86_64.tar.gz"
-mv "kibana-${KIBANA_VERSION}-linux-x86_64" /usr/share/kibana
+mv "kibana-${KIBANA_VERSION}" /usr/share/kibana
 
 id -u kibana &>/dev/null || useradd -m -s /bin/bash kibana
 chown -R kibana:kibana /usr/share/kibana
