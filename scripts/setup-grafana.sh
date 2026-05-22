@@ -11,8 +11,10 @@ echo "deb [signed-by=/usr/share/keyrings/grafana.key] https://apt.grafana.com st
 apt-get update
 apt-get install -y grafana
 
+GRAFANA_PASSWORD=$(cat /vagrant/secrets/grafana_password.txt 2>/dev/null || echo "admin")
+
 # Configure Grafana
-cat > /etc/grafana/grafana.ini << 'GRAFANA_CFG'
+cat > /etc/grafana/grafana.ini << GRAFANA_CFG
 [server]
 http_addr = 0.0.0.0
 http_port = 3000
@@ -26,19 +28,21 @@ org_role = Viewer
 
 [security]
 admin_user = admin
-admin_password = admin
+admin_password = $GRAFANA_PASSWORD
 
 [databases]
 ; use embedded SQLite by default
 GRAFANA_CFG
 
 # Add PostgreSQL datasource via API
-cat > /tmp/configure-grafana.sh << 'CONF'
+cat > /tmp/configure-grafana.sh << CONF
 #!/bin/bash
 sleep 5  # wait for grafana to start
 
+AUTH="admin:${GRAFANA_PASSWORD}"
+
 # Create PostgreSQL datasource
-curl -s -X POST http://admin:admin@localhost:3000/api/datasources \
+curl -s -X POST http://\${AUTH}@localhost:3000/api/datasources \
   -H "Content-Type: application/json" \
   -d '{
     "name":"PostgreSQL (labdb)",
@@ -57,7 +61,7 @@ curl -s -X POST http://admin:admin@localhost:3000/api/datasources \
   }'
 
 # Create practice_db datasource
-curl -s -X POST http://admin:admin@localhost:3000/api/datasources \
+curl -s -X POST http://\${AUTH}@localhost:3000/api/datasources \
   -H "Content-Type: application/json" \
   -d '{
     "name":"PostgreSQL (practice_db)",
@@ -75,7 +79,7 @@ curl -s -X POST http://admin:admin@localhost:3000/api/datasources \
   }'
 
 # Create a dashboard showing system metrics
-curl -s -X POST http://admin:admin@localhost:3000/api/dashboards/db \
+curl -s -X POST http://\${AUTH}@localhost:3000/api/dashboards/db \
   -H "Content-Type: application/json" \
   -d '{
     "dashboard": {
@@ -173,4 +177,4 @@ systemctl start grafana-server
 # Run config in background (grafana needs to be running first)
 /tmp/configure-grafana.sh &
 
-echo "Grafana ready: http://192.168.200.15:3000 (admin/admin)"
+echo "Grafana ready: http://192.168.200.15:3000 (admin / password from secrets/grafana_password.txt)"

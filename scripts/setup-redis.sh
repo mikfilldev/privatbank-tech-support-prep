@@ -4,8 +4,10 @@ set -e
 apt-get update
 apt-get install -y redis-server python3
 
-# Configure Redis for private network
-cat > /etc/redis/redis.conf << 'REDIS'
+REDIS_PASSWORD=$(cat /vagrant/secrets/redis_password.txt 2>/dev/null || echo "")
+
+# Configure Redis for private network with password
+cat > /etc/redis/redis.conf << REDIS
 bind 127.0.0.1 192.168.200.13
 port 6379
 daemonize no
@@ -14,16 +16,17 @@ loglevel notice
 save 900 1
 save 300 10
 save 60 10000
+requirepass ${REDIS_PASSWORD}
 REDIS
 
 systemctl enable redis-server
 systemctl restart redis-server
 
 # Seed Redis with sample data for NoSQL demo
-cat > /tmp/seed-redis.py << 'PYEOF'
+cat > /tmp/seed-redis.py << PYEOF
 import redis, json, random, time
 
-r = redis.Redis(host='127.0.0.1', port=6379, db=0)
+r = redis.Redis(host='127.0.0.1', port=6379, db=0, password='${REDIS_PASSWORD}')
 r.flushdb()
 
 # Session-like data (key-value)
@@ -77,14 +80,16 @@ PYEOF
 python3 /tmp/seed-redis.py
 
 # Python health/metrics server for Redis
-cat > /usr/local/bin/redis-server.py << 'PYEOF'
+cat > /usr/local/bin/redis-server.py << PYEOF
 #!/usr/bin/env python3
 import http.server, json, subprocess, shutil, redis, os
+
+REDIS_PASSWORD = '${REDIS_PASSWORD}'
 
 class RedisHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/":
-            r = redis.Redis(host='127.0.0.1', port=6379, db=0, socket_timeout=3)
+            r = redis.Redis(host='127.0.0.1', port=6379, db=0, socket_timeout=3, password=REDIS_PASSWORD)
             try:
                 info = r.info()
                 keys = r.dbsize()
@@ -153,4 +158,4 @@ chmod +x /usr/local/bin/redis-server.py
 pkill -f redis-server.py 2>/dev/null; sleep 1
 nohup python3 /usr/local/bin/redis-server.py > /var/log/redis-api.log 2>&1 &
 
-echo "Redis ready: 192.168.200.13:6379, API on :8080"
+echo "Redis ready: 192.168.200.13:6379 (password in secrets/redis_password.txt), API on :8080"
