@@ -44,7 +44,7 @@ Vagrant.configure("2") do |config|
     elk.vm.hostname = "elk"
     elk.vm.network "private_network", ip: "192.168.200.14"
     elk.vm.provider "virtualbox" do |vb|
-      vb.memory = 2048
+      vb.memory = 4096
       vb.cpus = 2
     end
     elk.vm.provision "shell", path: "scripts/setup-dns.sh"
