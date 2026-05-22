@@ -136,7 +136,7 @@ http.server.HTTPServer(("0.0.0.0", 8083), DnsMetricsHandler).serve_forever()
 PYEOF
 
 chmod +x /usr/local/bin/metrics-dns.py
-pkill -f metrics-dns.py 2>/dev/null; sleep 1
+pkill -f metrics-dns.py 2>/dev/null || true; sleep 1
 nohup python3 /usr/local/bin/metrics-dns.py < /dev/null > /var/log/metrics-dns.log 2>&1 & disown
 
 systemctl enable --now named

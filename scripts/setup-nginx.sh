@@ -159,7 +159,7 @@ http.server.HTTPServer(("127.0.0.1", 8082), WebMetricsHandler).serve_forever()
 PYEOF
 
 chmod +x /usr/local/bin/metrics-web.py
-pkill -f metrics-web.py 2>/dev/null; sleep 1
+pkill -f metrics-web.py 2>/dev/null || true; sleep 1
 nohup python3 /usr/local/bin/metrics-web.py < /dev/null > /var/log/metrics-web.log 2>&1 & disown
 
 cp -r /vagrant/web/* /var/www/html/

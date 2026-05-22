@@ -47,7 +47,7 @@ http.server.HTTPServer(("0.0.0.0", 8080), HealthHandler).serve_forever()
 PYEOF
 
 chmod +x /usr/local/bin/health-server.py
-pkill -f health-server.py 2>/dev/null; sleep 1
+pkill -f health-server.py 2>/dev/null || true; sleep 1
 nohup python3 /usr/local/bin/health-server.py < /dev/null > /var/log/health-server.log 2>&1 & disown
 
 cat > /usr/local/bin/metrics-server.py << 'PYEOF'
@@ -124,7 +124,7 @@ http.server.HTTPServer(("0.0.0.0", 8081), MetricsHandler).serve_forever()
 PYEOF
 
 chmod +x /usr/local/bin/metrics-server.py
-pkill -f metrics-server.py 2>/dev/null; sleep 1
+pkill -f metrics-server.py 2>/dev/null || true; sleep 1
 nohup python3 /usr/local/bin/metrics-server.py < /dev/null > /var/log/metrics-server.log 2>&1 & disown
 
 echo "PostgreSQL ready: user=labuser, db=labdb"

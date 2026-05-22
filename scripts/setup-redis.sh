@@ -158,7 +158,7 @@ http.server.HTTPServer(("0.0.0.0", 8080), RedisHandler).serve_forever()
 PYEOF
 
 chmod +x /usr/local/bin/redis-server.py
-pkill -f redis-server.py 2>/dev/null; sleep 1
+pkill -f redis-server.py 2>/dev/null || true; sleep 1
 nohup python3 /usr/local/bin/redis-server.py < /dev/null > /var/log/redis-api.log 2>&1 & disown
 
 echo "Redis ready: 192.168.200.13:6379 (password in secrets/redis_password.txt), API on :8080"
