@@ -79,7 +79,7 @@ vagrant-lab-practice/
 9. Топ співробітників по сумі замовлень
 10. Вартість pending замовлень
 
-**Query API:** `https://web1.lab.vbox/api/sql-practice/query/0..9`
+**Query API:** `https://web1.privatbank.local/api/sql-practice/query/0..9`
 
 ### NoSQL (srv3 / Redis)
 
@@ -91,12 +91,12 @@ vagrant-lab-practice/
 - **Sorted Set** — лідерборд (zadd, zrange)
 - **EXPIRE** — rate-limiting, кеш (setex)
 
-**API:** `https://web1.lab.vbox/api/redis/`
+**API:** `https://web1.privatbank.local/api/redis/`
 
 ### ELK (elk)
 
 - Elasticsearch 8.17.3 — зберігання та пошук логів
-- Kibana — візуалізація (https://web1.lab.vbox/api/kibana/)
+- Kibana — візуалізація (https://web1.privatbank.local/api/kibana/)
 - Filebeat на web1, db1, dns, srv3, grafana — збір системних логів + логів сервісів
 
 ### Grafana (grafana)
@@ -104,7 +104,7 @@ vagrant-lab-practice/
 - PostgreSQL datasource (`labdb` + `practice_db`)
 - Дашборд: DB connections, database size, departments budget, employees per dept, salary distribution, recent orders
 - Anonymous access (Viewer role)
-- `https://web1.lab.vbox/api/grafana/` (admin/admin)
+- `https://web1.privatbank.local/api/grafana/` (admin/admin)
 
 ---
 
@@ -118,18 +118,18 @@ python3 scripts/generate-password.py
 vagrant up
 
 # Open dashboard
-# https://web1.lab.vbox
+# https://web1.privatbank.local
 ```
 
 ### Hosts file (C:\Windows\System32\drivers\etc\hosts)
 
 ```
-192.168.56.5  dns.lab.vbox
-192.168.56.11 web1.lab.vbox
-192.168.56.12 db1.lab.vbox
-192.168.56.13 srv3.lab.vbox
-192.168.56.14 elk.lab.vbox
-192.168.56.15 grafana.lab.vbox
+192.168.56.5  dns.privatbank.local
+192.168.56.11 web1.privatbank.local
+192.168.56.12 db1.privatbank.local
+192.168.56.13 srv3.privatbank.local
+192.168.56.14 elk.privatbank.local
+192.168.56.15 grafana.privatbank.local
 ```
 
 ---

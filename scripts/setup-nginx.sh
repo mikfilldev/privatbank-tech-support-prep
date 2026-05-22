@@ -2,13 +2,13 @@
 apt-get update
 apt-get install -y nginx openssl
 
-# Self-signed cert for *.lab.vbox
+# Self-signed cert for *.privatbank.local
 mkdir -p /etc/nginx/ssl
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
   -keyout /etc/nginx/ssl/lab.key \
   -out /etc/nginx/ssl/lab.crt \
-  -subj "/CN=*.lab.vbox/O=Vagrant Lab/C=UA" \
-  -addext "subjectAltName=DNS:*.lab.vbox,DNS:web1.lab.vbox,DNS:db1.lab.vbox,DNS:dns.lab.vbox"
+  -subj "/CN=*.privatbank.local/O=Vagrant Lab/C=UA" \
+  -addext "subjectAltName=DNS:*.privatbank.local,DNS:web1.privatbank.local,DNS:db1.privatbank.local,DNS:dns.privatbank.local"
 
 cat > /etc/nginx/sites-available/default << 'NGINX'
 server {

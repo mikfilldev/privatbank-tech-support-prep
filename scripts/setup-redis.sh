@@ -67,9 +67,9 @@ for name, score in [('Alice', 95), ('Bob', 87), ('Carol', 92), ('David', 78), ('
     r.zadd('leaderboard:scores', {name: score})
 
 # Hash: user profiles
-r.hset('user:1', mapping={'name': 'Alice Smith', 'email': 'alice@lab.vbox', 'dept': 'Engineering', 'projects': '3'})
-r.hset('user:2', mapping={'name': 'Bob Johnson', 'email': 'bob@lab.vbox', 'dept': 'Engineering', 'projects': '2'})
-r.hset('user:3', mapping={'name': 'Carol White', 'email': 'carol@lab.vbox', 'dept': 'Marketing', 'projects': '5'})
+r.hset('user:1', mapping={'name': 'Alice Smith', 'email': 'alice@privatbank.local', 'dept': 'Engineering', 'projects': '3'})
+r.hset('user:2', mapping={'name': 'Bob Johnson', 'email': 'bob@privatbank.local', 'dept': 'Engineering', 'projects': '2'})
+r.hset('user:3', mapping={'name': 'Carol White', 'email': 'carol@privatbank.local', 'dept': 'Marketing', 'projects': '5'})
 
 print(f"Redis seeded: keys={r.dbsize()}")
 PYEOF

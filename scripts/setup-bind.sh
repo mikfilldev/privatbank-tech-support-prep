@@ -14,9 +14,9 @@ options {
     forwarders { 8.8.8.8; 1.1.1.1; };
 };
 
-zone "lab.vbox" IN {
+zone "privatbank.local" IN {
     type master;
-    file "lab.vbox.zone";
+    file "privatbank.local.zone";
 };
 
 zone "56.168.192.in-addr.arpa" IN {
@@ -25,15 +25,15 @@ zone "56.168.192.in-addr.arpa" IN {
 };
 EOF
 
-cat > /var/named/lab.vbox.zone << 'EOF'
+cat > /var/named/privatbank.local.zone << 'EOF'
 $TTL 86400
-@   IN  SOA dns.lab.vbox. admin.lab.vbox. (
+@   IN  SOA dns.privatbank.local. admin.privatbank.local. (
         2025051701
         3600
         900
         604800
         86400 )
-    IN  NS  dns.lab.vbox.
+    IN  NS  dns.privatbank.local.
 
 dns     IN  A   192.168.56.5
 web1    IN  A   192.168.56.11
@@ -45,24 +45,24 @@ EOF
 
 cat > /var/named/56.168.192.zone << 'EOF'
 $TTL 86400
-@   IN  SOA dns.lab.vbox. admin.lab.vbox. (
+@   IN  SOA dns.privatbank.local. admin.privatbank.local. (
         2025051701
         3600
         900
         604800
         86400 )
-    IN  NS  dns.lab.vbox.
+    IN  NS  dns.privatbank.local.
 
-5   IN  PTR dns.lab.vbox.
-11  IN  PTR web1.lab.vbox.
-12  IN  PTR db1.lab.vbox.
-13  IN  PTR srv3.lab.vbox.
-14  IN  PTR elk.lab.vbox.
-15  IN  PTR grafana.lab.vbox.
+5   IN  PTR dns.privatbank.local.
+11  IN  PTR web1.privatbank.local.
+12  IN  PTR db1.privatbank.local.
+13  IN  PTR srv3.privatbank.local.
+14  IN  PTR elk.privatbank.local.
+15  IN  PTR grafana.privatbank.local.
 EOF
 
 chown -R named:named /var/named
-chmod 640 /var/named/lab.vbox.zone /var/named/56.168.192.zone
+chmod 640 /var/named/privatbank.local.zone /var/named/56.168.192.zone
 
 firewall-cmd --add-service=dns --permanent
 firewall-cmd --reload
@@ -118,7 +118,7 @@ class DnsMetricsHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(json.dumps({
             "status": "online",
             "service": "bind",
-            "host": "dns.lab.vbox",
+            "host": "dns.privatbank.local",
             "mem_total_mb": mem_total, "mem_avail_mb": mem_avail,
             "mem_used_pct": mem_pct,
             "disk_total_gb": disk_total, "disk_free_gb": disk_free,

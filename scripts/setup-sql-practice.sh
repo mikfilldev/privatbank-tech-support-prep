@@ -34,16 +34,16 @@ CREATE TABLE employees (
 );
 
 INSERT INTO employees (name, email, department_id, salary, hired_at) VALUES
-('Alice Smith',     'alice@lab.vbox',   1, 85000,  '2022-03-15'),
-('Bob Johnson',     'bob@lab.vbox',     1, 72000,  '2023-01-10'),
-('Carol White',     'carol@lab.vbox',   2, 65000,  '2021-06-01'),
-('David Brown',     'david@lab.vbox',   2, 58000,  '2024-02-20'),
-('Eve Davis',       'eve@lab.vbox',     3, 91000,  '2020-11-05'),
-('Frank Miller',    'frank@lab.vbox',   3, 47000,  '2024-07-01'),
-('Grace Wilson',    'grace@lab.vbox',   4, 52000,  '2023-09-12'),
-('Henry Moore',     'henry@lab.vbox',   5, 48000,  '2022-12-01'),
-('Ivy Taylor',      'ivy@lab.vbox',     1, 95000,  '2021-04-18'),
-('Jack Anderson',   'jack@lab.vbox',    4, 44000,  '2024-05-30');
+('Alice Smith',     'alice@privatbank.local',   1, 85000,  '2022-03-15'),
+('Bob Johnson',     'bob@privatbank.local',     1, 72000,  '2023-01-10'),
+('Carol White',     'carol@privatbank.local',   2, 65000,  '2021-06-01'),
+('David Brown',     'david@privatbank.local',   2, 58000,  '2024-02-20'),
+('Eve Davis',       'eve@privatbank.local',     3, 91000,  '2020-11-05'),
+('Frank Miller',    'frank@privatbank.local',   3, 47000,  '2024-07-01'),
+('Grace Wilson',    'grace@privatbank.local',   4, 52000,  '2023-09-12'),
+('Henry Moore',     'henry@privatbank.local',   5, 48000,  '2022-12-01'),
+('Ivy Taylor',      'ivy@privatbank.local',     1, 95000,  '2021-04-18'),
+('Jack Anderson',   'jack@privatbank.local',    4, 44000,  '2024-05-30');
 
 -- Products
 CREATE TABLE products (
@@ -190,7 +190,7 @@ ORDER BY o.id, oi.id;
 
 -- 7. EXPLAIN examples
 EXPLAIN SELECT * FROM employees WHERE department_id = 1;
-EXPLAIN SELECT * FROM employees WHERE email = 'alice@lab.vbox';
+EXPLAIN SELECT * FROM employees WHERE email = 'alice@privatbank.local';
 
 -- 8. Find products never ordered
 SELECT p.name, p.category

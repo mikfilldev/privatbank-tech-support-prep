@@ -77,7 +77,7 @@ mkdir -p /etc/kibana
 cat > /etc/kibana/kibana.yml << 'KIBYML'
 server.host: "0.0.0.0"
 server.port: 5601
-server.publicBaseUrl: "https://web1.lab.vbox/api/kibana"
+server.publicBaseUrl: "https://web1.privatbank.local/api/kibana"
 server.basePath: "/api/kibana"
 server.rewriteBasePath: true
 elasticsearch.hosts: ["http://127.0.0.1:9200"]

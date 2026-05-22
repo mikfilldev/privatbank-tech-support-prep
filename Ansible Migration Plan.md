@@ -26,7 +26,7 @@ Vagrant Lab/
 │       │   ├── tasks/main.yml
 │       │   ├── templates/
 │       │   │   ├── named.conf.j2
-│       │   │   ├── lab.vbox.zone.j2
+│       │   │   ├── privatbank.local.zone.j2
 │       │   │   └── 56.168.192.zone.j2
 │       │   └── files/
 │       │       └── metrics-dns.service
@@ -86,7 +86,7 @@ gathering = explicit
       changed_when: false
   vars:
     dns_ip: 192.168.56.5
-    domain: lab.vbox
+    domain: privatbank.local
 ```
 
 ### Vagrantfile (фрагмент)
@@ -226,7 +226,7 @@ ansible/roles/dns_server/
 │   └── main.yml
 ├── templates/
 │   ├── named.conf.j2
-│   ├── lab.vbox.zone.j2
+│   ├── privatbank.local.zone.j2
 │   └── 56.168.192.zone.j2
 ├── files/
 │   └── metrics-dns.service
@@ -252,8 +252,8 @@ ansible/roles/dns_server/
 
 - name: Deploy forward zone
   template:
-    src: lab.vbox.zone.j2
-    dest: /var/named/lab.vbox.zone
+    src: privatbank.local.zone.j2
+    dest: /var/named/privatbank.local.zone
   notify: restart named
 
 - name: Deploy reverse zone
@@ -269,7 +269,7 @@ ansible/roles/dns_server/
     group: named
     mode: '0640'
   loop:
-    - /var/named/lab.vbox.zone
+    - /var/named/privatbank.local.zone
     - /var/named/56.168.192.zone
 
 - name: Open firewall for DNS
@@ -302,7 +302,7 @@ options {
 
 zone "{{ domain }}" IN {
     type master;
-    file "lab.vbox.zone";
+    file "privatbank.local.zone";
 };
 
 zone "56.168.192.in-addr.arpa" IN {
@@ -424,7 +424,7 @@ Vagrant.configure("2") do |config|
       ansible.playbook = "ansible/roles/nginx/tasks/main.yml"
       ansible.provisioning_path = "/vagrant/ansible"
       ansible.extra_vars = {
-        domain: "lab.vbox",
+        domain: "privatbank.local",
         dns_ip: "192.168.56.5",
       }
     end

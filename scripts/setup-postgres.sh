@@ -37,7 +37,7 @@ class HealthHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(json.dumps({
             "status": "online" if pg_status else "degraded",
             "service": "postgresql",
-            "host": "db1.lab.vbox",
+            "host": "db1.privatbank.local",
             "pg_ready": pg_status,
         }).encode())
 

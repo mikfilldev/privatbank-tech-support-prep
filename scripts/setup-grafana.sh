@@ -16,8 +16,8 @@ cat > /etc/grafana/grafana.ini << 'GRAFANA_CFG'
 [server]
 http_addr = 0.0.0.0
 http_port = 3000
-domain = grafana.lab.vbox
-root_url = https://web1.lab.vbox/api/grafana/
+domain = grafana.privatbank.local
+root_url = https://web1.privatbank.local/api/grafana/
 serve_from_sub_path = true
 
 [auth.anonymous]
