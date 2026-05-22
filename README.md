@@ -1,17 +1,17 @@
 # Vagrant Lab — Practice Environment
 
-Шість віртуальних машин для демонстрації навичок роботи з базами даних (SQL/NoSQL),
-системами моніторингу (ELK, Grafana) та DevOps інструментами.
+Сім віртуальних машин для демонстрації навичок роботи з базами даних (SQL/NoSQL),
+системами моніторингу (Zabbix, Grafana, ELK) та DevOps інструментами.
 
 | VM | IP | Роль | Технології |
 |----|----|------|------------|
 | `dns` | 192.168.200.5 | DNS-сервер | BIND, Oracle Linux 10 |
-| `web1` | 192.168.200.11 | Веб-сервер | nginx, Grafana, dashboard |
+| `web1` | 192.168.200.11 | Веб-сервер | nginx, dashboard, metrics |
 | `db1` | 192.168.200.12 | PostgreSQL | SQL (labdb + practice_db), health/metrics API |
 | `srv3` | 192.168.200.13 | NoSQL | Redis (sessions, cache, rate-limiting, leaderboard) |
-| `elk` | 192.168.200.14 | Логування | Elasticsearch + Kibana + Filebeat (лог-централізація) |
-| `grafana` | 192.168.200.15 | Моніторинг | Grafana (дашборди з PostgreSQL) |
-| `zabbix` | 192.168.200.16 | Моніторинг | Zabbix (сервер + фронтенд + агент) |
+| `elk` | 192.168.200.14 | Логування | Elasticsearch + Kibana + Filebeat |
+| `grafana` | 192.168.200.15 | BI/Monitoring | Grafana (дашборди з PostgreSQL) |
+| `zabbix` | 192.168.200.16 | Monitoring | Zabbix server + frontend + agent |
 
 ---
 
@@ -21,9 +21,9 @@
 
 - **SQL** — `practice_db` з 5 таблицями, складними запитами (JOIN, CTE, window functions, EXPLAIN)
 - **NoSQL** — Redis з різними типами даних (strings, hashes, lists, sets, sorted sets, rate-limiting)
-- **Моніторинг** — Grafana з дашбордами, підключена до PostgreSQL; вбудована dashboard з метриками
+- **Моніторинг** — Grafana (BI-дашборди) + Zabbix (алертинг, спостереження за інфраструктурою)
 - **Логування** — ELK stack (Elasticsearch + Kibana), Filebeat збирає логи з усіх VMs
-- **DevOps** — Vagrant, VirtualBox, shell provisioning, DNS (BIND), HTTPS, reverse proxy
+- **DevOps** — Vagrant, VirtualBox, BIND DNS, nginx reverse proxy, HTTPS, self-signed SSL
 
 ---
 
@@ -31,9 +31,9 @@
 
 ```
 vagrant-lab-practice/
-├── Vagrantfile              # 6 VMs
+├── Vagrantfile              # 7 VMs
 ├── web/                     # Dashboard (HTML/CSS/JS)
-│   ├── index.html           # 6 карток + SQL query runner
+│   ├── index.html           # 8 карток + SQL query runner
 │   ├── style.css            # Dark theme
 │   └── script.js            # Polling health + metrics (10s)
 ├── scripts/
@@ -46,9 +46,13 @@ vagrant-lab-practice/
 │   ├── setup-elk.sh         # Elasticsearch + Kibana
 │   ├── setup-filebeat.sh    # Filebeat (лог-збір на кожній VM)
 │   ├── setup-grafana.sh     # Grafana + PostgreSQL datasource + дашборд
+│   ├── setup-zabbix.sh      # Zabbix server + frontend + agent
 │   └── generate-password.py
-├── secrets/
-│   └── pg_password.txt
+├── secrets/                 # *.gitignore — не потрапляють у репозиторій
+│   ├── pg_password.txt
+│   ├── grafana_password.txt
+│   ├── redis_password.txt
+│   └── zabbix_password.txt
 └── Ansible Migration Plan.md
 ```
 
@@ -98,21 +102,29 @@ vagrant-lab-practice/
 
 - Elasticsearch 8.17.3 — зберігання та пошук логів
 - Kibana — візуалізація (https://web1.privatbank.local/api/kibana/)
-- Filebeat на web1, db1, dns, srv3, grafana — збір системних логів + логів сервісів
+- Filebeat на web1, db1, dns, srv3, grafana, zabbix — збір системних логів + логів сервісів
 
 ### Grafana (grafana)
 
 - PostgreSQL datasource (`labdb` + `practice_db`)
 - Дашборд: DB connections, database size, departments budget, employees per dept, salary distribution, recent orders
 - Anonymous access (Viewer role)
-- `https://web1.privatbank.local/api/grafana/` (admin/admin)
+- `https://web1.privatbank.local/api/grafana/` (admin / пароль з `secrets/grafana_password.txt`)
+
+### Zabbix (zabbix)
+
+- Zabbix Server 7.0 LTS — централізований моніторинг інфраструктури
+- PostgreSQL backend (локальний)
+- Агент (zabbix_agent2) для самоконтролю
+- Веб-фронтенд: Apache + PHP
+- `https://web1.privatbank.local/api/zabbix/` (Admin / пароль з `secrets/zabbix_password.txt`)
 
 ---
 
 ## Quick Start
 
 ```bash
-# Generate PostgreSQL password
+# Generate all passwords
 python3 scripts/generate-password.py
 
 # Start all VMs
@@ -130,6 +142,7 @@ vagrant up
 192.168.200.12 db1.privatbank.local
 192.168.200.13 srv3.privatbank.local
 192.168.200.14 elk.privatbank.local
+192.168.200.15 grafana.privatbank.local
 192.168.200.16 zabbix.privatbank.local
 ```
 
