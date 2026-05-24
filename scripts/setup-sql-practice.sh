@@ -323,7 +323,21 @@ http.server.HTTPServer(("0.0.0.0", 8082), SQLPracticeHandler).serve_forever()
 PYEOF
 
 chmod +x /usr/local/bin/sql-practice-server.py
-pkill -f sql-practice-server.py 2>/dev/null || true; sleep 1
-nohup python3 /usr/local/bin/sql-practice-server.py < /dev/null > /var/log/sql-practice.log 2>&1 & disown
+cat > /etc/systemd/system/sql-practice.service << UNIT
+[Unit]
+Description=SQL Practice API Server
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/sql-practice-server.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl daemon-reload
+systemctl enable --now sql-practice
 
 echo "SQL practice ready: db=practice_db, api=127.0.0.1:8082"

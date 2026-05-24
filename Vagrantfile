@@ -28,16 +28,17 @@ Vagrant.configure("2") do |config|
     web.vm.provision "shell", path: "scripts/setup-filebeat.sh"
   end
 
-  config.vm.define "srv3" do |srv|
-    srv.vm.hostname = "srv3"
-    srv.vm.network "private_network", ip: "192.168.200.13"
-    srv.vm.provider "virtualbox" do |vb|
+  config.vm.define "redis" do |rd|
+    rd.vm.hostname = "redis"
+    rd.vm.network "private_network", ip: "192.168.200.13"
+    rd.vm.provider "virtualbox" do |vb|
       vb.memory = 512
       vb.cpus = 1
     end
-    srv.vm.provision "shell", path: "scripts/setup-dns.sh"
-    srv.vm.provision "shell", path: "scripts/setup-redis.sh"
-    srv.vm.provision "shell", path: "scripts/setup-filebeat.sh"
+    rd.vm.provision "shell", path: "scripts/setup-dns.sh"
+    rd.vm.provision "shell", path: "scripts/install-uv.sh"
+    rd.vm.provision "shell", path: "scripts/setup-redis.sh"
+    rd.vm.provision "shell", path: "scripts/setup-filebeat.sh"
   end
 
   config.vm.define "elk" do |elk|
@@ -86,6 +87,8 @@ Vagrant.configure("2") do |config|
     db.vm.provision "shell", path: "scripts/setup-postgres.sh",
       args: [pg_password]
     db.vm.provision "shell", path: "scripts/setup-sql-practice.sh"
+    db.vm.provision "shell", path: "scripts/install-uv.sh"
+    db.vm.provision "shell", path: "scripts/seed-sql-data.sh"
     db.vm.provision "shell", path: "scripts/setup-filebeat.sh"
   end
 end

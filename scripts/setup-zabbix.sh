@@ -12,18 +12,18 @@ wget -q "https://repo.zabbix.com/zabbix/${ZABBIX_VERSION}/ubuntu/pool/main/z/zab
 dpkg -i zabbix-release_latest_7.0+ubuntu24.04_all.deb
 apt-get update
 
-# Install Zabbix server, frontend, agent
-apt-get install -y zabbix-server-pgsql zabbix-frontend-php zabbix-agent2 zabbix-sql-scripts postgresql
+# Install Zabbix server, frontend, agent, Apache
+apt-get install -y zabbix-server-pgsql zabbix-frontend-php php8.3-pgsql zabbix-apache-conf zabbix-sql-scripts zabbix-agent2 postgresql apache2 libapache2-mod-php
 
-# Create Zabbix database
-sudo -u postgres psql <<SQL
-CREATE USER zabbix WITH PASSWORD '${ZABBIX_PASSWORD}';
-CREATE DATABASE zabbix OWNER zabbix;
-GRANT ALL PRIVILEGES ON DATABASE zabbix TO zabbix;
-SQL
+# Create Zabbix database (idempotent)
+sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='zabbix'" | grep -q 1 2>/dev/null || sudo -u postgres createuser zabbix
+sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='zabbix'" | grep -q 1 2>/dev/null || sudo -u postgres createdb zabbix --owner zabbix
+sudo -u postgres psql -c "ALTER USER zabbix WITH PASSWORD '${ZABBIX_PASSWORD}'" 2>/dev/null || true
 
-# Import Zabbix schema
-zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix
+# Import Zabbix schema (idempotent)
+sudo -u zabbix psql zabbix -c "SELECT 1 FROM users LIMIT 1" 2>/dev/null || {
+  zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix
+}
 
 # Configure Zabbix server
 cat > /etc/zabbix/zabbix_server.conf << ZBXSRV
@@ -47,38 +47,14 @@ if [ -n "$PHP_INI" ]; then
   sed -i 's/^;date.timezone.*/date.timezone = Europe\/Kyiv/' "$PHP_INI"
 fi
 
-# Configure Apache for Zabbix
-cat > /etc/apache2/conf-available/zabbix.conf << APACHE
-Alias /zabbix /usr/share/zabbix
-
-<Directory "/usr/share/zabbix">
-    Options FollowSymLinks
-    AllowOverride All
-    Require all granted
-</Directory>
-
-<Directory "/usr/share/zabbix/conf">
-    Require all denied
-</Directory>
-
-<Directory "/usr/share/zabbix/app">
-    Require all denied
-</Directory>
-
-<Directory "/usr/share/zabbix/include">
-    Require all denied
-</Directory>
-
-<Directory "/usr/share/zabbix/vendor">
-    Require all denied
-</Directory>
-APACHE
-
+# Enable Zabbix Apache config (provided by zabbix-apache-conf)
 a2enconf zabbix
 a2enmod rewrite
-a2dissite 000-default
+PHP_MOD="php$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || echo 8.3)"
+a2enmod "$PHP_MOD"
 
 # Zabbix frontend config
+mkdir -p /etc/zabbix/web
 cat > /etc/zabbix/web/zabbix.conf.php << ZBXWEB
 <?php
 \$DB['TYPE']     = 'POSTGRESQL';
@@ -102,14 +78,25 @@ HostMetadata=system.uname
 ListenPort=10050
 LogFile=/var/log/zabbix/zabbix_agent2.log
 LogFileSize=10
-EnableRemoteCommands=1
 ZBXAGT
+
+# Prepare log directory (agent2 fails if missing)
+mkdir -p /var/log/zabbix
+chown zabbix:zabbix /var/log/zabbix
 
 # Start services
 systemctl enable zabbix-server zabbix-agent2 apache2 postgresql
 systemctl restart postgresql
-systemctl restart zabbix-server
-systemctl restart zabbix-agent2
+systemctl restart zabbix-agent2 || true
 systemctl restart apache2
+# Set admin password directly in DB (server not needed)
+sudo -u zabbix psql zabbix -c "ALTER TABLE users ALTER COLUMN passwd TYPE varchar(64);" 2>/dev/null || true
+ADMIN_HASH=$(php -r 'echo password_hash("'"${ZABBIX_PASSWORD}"'", PASSWORD_BCRYPT);')
+sudo -u zabbix psql zabbix -c "UPDATE users SET passwd='$ADMIN_HASH', attempt_failed=0, attempt_clock=0 WHERE userid=1"
+
+# Zabbix server may take minutes on first start (cache init from schema)
+# Run with timeout so provisioning doesn't hang indefinitely
+systemctl stop zabbix-server 2>/dev/null || true
+timeout 300 systemctl start zabbix-server || true
 
 echo "Zabbix ready: http://192.168.200.16/zabbix (Admin / ${ZABBIX_PASSWORD})"

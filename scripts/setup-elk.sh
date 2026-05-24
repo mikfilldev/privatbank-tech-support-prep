@@ -11,13 +11,23 @@ ES_VERSION="8.17.3"
 apt-get update
 apt-get install -y openjdk-17-jre-headless wget curl gnupg
 
+# Elasticsearch needs higher mmap count
+sysctl -w vm.max_map_count=262144
+echo "vm.max_map_count=262144" >> /etc/sysctl.conf
+
 # ─── Elasticsearch ───
 cd /tmp
 if [ ! -f "elasticsearch-${ES_VERSION}-linux-x86_64.tar.gz" ]; then
   wget -q "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}-linux-x86_64.tar.gz"
 fi
 tar -xzf "elasticsearch-${ES_VERSION}-linux-x86_64.tar.gz"
-mv "elasticsearch-${ES_VERSION}" /usr/share/elasticsearch
+# Handle possible extract directory name
+rm -rf /usr/share/elasticsearch
+if [ -d "elasticsearch-${ES_VERSION}-linux-x86_64" ]; then
+  mv "elasticsearch-${ES_VERSION}-linux-x86_64" /usr/share/elasticsearch
+elif [ -d "elasticsearch-${ES_VERSION}" ]; then
+  mv "elasticsearch-${ES_VERSION}" /usr/share/elasticsearch
+fi
 
 # Create elasticsearch user
 id -u elasticsearch &>/dev/null || useradd -m -s /bin/bash elasticsearch
@@ -64,6 +74,16 @@ systemctl daemon-reload
 systemctl enable elasticsearch
 systemctl start elasticsearch
 
+# Wait for ES to be ready
+echo "Waiting for Elasticsearch to start..."
+for i in $(seq 1 30); do
+  if curl -s http://127.0.0.1:9200 >/dev/null 2>&1; then
+    echo "Elasticsearch is ready"
+    break
+  fi
+  sleep 2
+done
+
 # ─── Kibana ───
 KIBANA_VERSION="8.17.3"
 cd /tmp
@@ -71,7 +91,13 @@ if [ ! -f "kibana-${KIBANA_VERSION}-linux-x86_64.tar.gz" ]; then
   wget -q "https://artifacts.elastic.co/downloads/kibana/kibana-${KIBANA_VERSION}-linux-x86_64.tar.gz"
 fi
 tar -xzf "kibana-${KIBANA_VERSION}-linux-x86_64.tar.gz"
-mv "kibana-${KIBANA_VERSION}" /usr/share/kibana
+# Handle possible extract directory name (with or without -linux-x86_64)
+rm -rf /usr/share/kibana
+if [ -d "kibana-${KIBANA_VERSION}-linux-x86_64" ]; then
+  mv "kibana-${KIBANA_VERSION}-linux-x86_64" /usr/share/kibana
+elif [ -d "kibana-${KIBANA_VERSION}" ]; then
+  mv "kibana-${KIBANA_VERSION}" /usr/share/kibana
+fi
 
 id -u kibana &>/dev/null || useradd -m -s /bin/bash kibana
 chown -R kibana:kibana /usr/share/kibana
@@ -96,6 +122,7 @@ Requires=elasticsearch.service
 Type=simple
 User=kibana
 Group=kibana
+Environment=KBN_PATH_CONF=/etc/kibana
 ExecStart=/usr/share/kibana/bin/kibana
 Restart=always
 RestartSec=10

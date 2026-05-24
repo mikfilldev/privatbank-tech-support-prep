@@ -86,36 +86,95 @@ async function checkSqlStatus() {
     } catch { setStatus('sql', 'offline', 'Offline'); }
 }
 
+let _sqlCache = {};
+
+async function fetchSqlPreview() {
+    const n = parseInt($('sql-query-select').value);
+    const preview = $('sql-preview');
+    if (_sqlCache[n]) {
+        preview.textContent = _sqlCache[n].query;
+        return;
+    }
+    try {
+        const res = await fetch(`/api/sql-practice/query/${n}`, { signal: AbortSignal.timeout(10000) });
+        if (res.status !== 200) return;
+        const d = await res.json();
+        _sqlCache[n] = d;
+        preview.textContent = d.query;
+    } catch {}
+}
+
 async function runSqlQuery() {
     const n = parseInt($('sql-query-select').value);
     const btn = $('sql-run-btn');
-    const result = $('sql-result');
-    btn.textContent = '⏳ Running...';
+    const loading = $('sql-loading');
+    const thead = $('sql-thead');
+    const tbody = $('sql-tbody');
+    const explain = $('sql-explain');
+    const explainBox = $('sql-explain-box');
+    const rowCount = $('sql-row-count');
+
+    btn.textContent = '⏳';
     btn.disabled = true;
-    result.textContent = '';
+    loading.style.display = 'block';
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+    explain.textContent = '';
+    explainBox.style.display = 'none';
+    rowCount.textContent = '';
+
     try {
-        const res = await fetch(`/api/sql-practice/query/${n}`, { signal: AbortSignal.timeout(10000) });
-        if (res.status !== 200) { result.textContent = `Error ${res.status}`; return; }
-        const d = await res.json();
-        let out = `-- ${d.query.split('\n')[0].replace('-- ', '')}\n`;
-        if (d.result && d.result.data) {
-            for (const row of d.result.data.slice(0, 20)) {
-                out += row.join(' │ ') + '\n';
+        const d = _sqlCache[n] || await (await fetch(`/api/sql-practice/query/${n}`, { signal: AbortSignal.timeout(10000) })).json();
+        _sqlCache[n] = d;
+
+        // Results table
+        if (d.result && d.result.data && d.result.data.length > 0) {
+            // First row as header
+            const headerRow = d.result.data[0];
+            const dataRows = d.result.data.slice(1);
+
+            let h = '<tr>';
+            for (const col of headerRow) {
+                h += `<th>${escHtml(col)}</th>`;
             }
-            if (d.result.data.length > 20) out += `... (${d.result.data.length} rows)`;
+            h += '</tr>';
+            thead.innerHTML = h;
+
+            let b = '';
+            for (const row of dataRows) {
+                b += '<tr>';
+                for (const cell of row) {
+                    b += `<td>${escHtml(cell)}</td>`;
+                }
+                b += '</tr>';
+            }
+            tbody.innerHTML = b;
+            rowCount.textContent = `${dataRows.length} rows`;
+        } else if (d.result && d.result.data) {
+            rowCount.textContent = '0 rows';
         }
-        if (d.explain && d.explain.data) {
-            out += '\n-- EXPLAIN:\n';
+
+        // EXPLAIN
+        if (d.explain && d.explain.data && d.explain.data.length > 0) {
+            let x = '';
             for (const row of d.explain.data) {
-                out += row.join(' ') + '\n';
+                x += row.join(' ') + '\n';
             }
+            explain.textContent = x;
+            explainBox.style.display = 'block';
         }
-        result.textContent = out;
     } catch(e) {
-        result.textContent = `Error: ${e.message}`;
+        tbody.innerHTML = `<tr><td style="color:#f87171;text-align:center;padding:12px;">Error: ${e.message}</td></tr>`;
     }
     btn.textContent = '▶ Run Query';
     btn.disabled = false;
+    loading.style.display = 'none';
+}
+
+function escHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = String(s);
+    return d.innerHTML;
 }
 
 async function checkRedis() {
@@ -185,3 +244,5 @@ checkAll();
 setInterval(checkAll, 10000);
 
 $('sql-run-btn').addEventListener('click', runSqlQuery);
+$('sql-query-select').addEventListener('change', fetchSqlPreview);
+fetchSqlPreview();

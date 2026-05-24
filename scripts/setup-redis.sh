@@ -5,7 +5,7 @@ export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 
 apt-get update
-apt-get install -y redis-server python3 python3-redis python3-pip
+apt-get install -y redis-server python3
 
 REDIS_PASSWORD=$(cat /vagrant/secrets/redis_password.txt 2>/dev/null || echo "")
 
@@ -24,6 +24,18 @@ REDIS
 
 systemctl enable redis-server
 systemctl restart redis-server
+
+# Create uv project for redis
+mkdir -p /opt/redis-venv
+cat > /opt/redis-venv/pyproject.toml << TOML
+[project]
+name = "redis-scripts"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = ["redis"]
+TOML
+
+uv sync --project /opt/redis-venv -q
 
 # Seed Redis with sample data for NoSQL demo
 cat > /tmp/seed-redis.py << PYEOF
@@ -80,7 +92,7 @@ r.hset('user:3', mapping={'name': 'Carol White', 'email': 'carol@privatbank.loca
 print(f"Redis seeded: keys={r.dbsize()}")
 PYEOF
 
-python3 /tmp/seed-redis.py
+uv run --project /opt/redis-venv /tmp/seed-redis.py
 
 # Python health/metrics server for Redis
 cat > /usr/local/bin/redis-server.py << PYEOF
@@ -158,7 +170,22 @@ http.server.HTTPServer(("0.0.0.0", 8080), RedisHandler).serve_forever()
 PYEOF
 
 chmod +x /usr/local/bin/redis-server.py
-pkill -f redis-server.py 2>/dev/null || true; sleep 1
-nohup python3 /usr/local/bin/redis-server.py < /dev/null > /var/log/redis-api.log 2>&1 & disown
+cat > /etc/systemd/system/redis-api.service << UNIT
+[Unit]
+Description=Redis API Server
+After=network.target redis-server.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/uv run --project /opt/redis-venv /usr/local/bin/redis-server.py
+Restart=always
+RestartSec=5
+Environment=UV_PROJECT=/opt/redis-venv
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl daemon-reload
+systemctl enable --now redis-api
 
 echo "Redis ready: 192.168.200.13:6379 (password in secrets/redis_password.txt), API on :8080"

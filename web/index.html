@@ -119,34 +119,53 @@
                 </div>
             </div>
 
-            <div class="card" data-service="sql">
+            <div class="card card-sql" data-service="sql">
                 <div class="card-header">
                     <span class="indicator" id="sql-indicator"></span>
                     <h2>SQL</h2>
                 </div>
                 <div class="card-body">
                     <p class="host">practice_db (PostgreSQL)</p>
-                    <p class="ip" id="sql-info">5 tables · examples</p>
+                    <p class="ip" id="sql-info">—</p>
                     <p class="status-text" id="sql-status">Checking...</p>
 
-                    <div class="metric-row">
-                        <span class="metric-label">Query</span>
-                        <select id="sql-query-select" style="flex:1;background:rgba(255,255,255,0.08);color:#e0e0e0;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:4px 8px;font-size:0.75rem;">
-                            <option value="0">Employees + Departments</option>
-                            <option value="1">Dept avg salary</option>
-                            <option value="2">Above dept avg</option>
-                            <option value="3">Top spenders (CTE)</option>
-                            <option value="4">Window rank depts</option>
-                            <option value="5">Running total</option>
-                            <option value="7">Products never ordered</option>
-                            <option value="8">Top employees by spend</option>
-                            <option value="9">Pending orders value</option>
+                    <div class="sql-bar">
+                        <select id="sql-query-select" class="sql-select">
+                            <option value="0">1. JOIN — Employees + Departments</option>
+                            <option value="1">2. GROUP BY — Dept avg salary</option>
+                            <option value="2">3. Subquery — Above dept avg</option>
+                            <option value="3">4. CTE — Top spenders</option>
+                            <option value="4">5. Window — Rank depts</option>
+                            <option value="5">6. Window — Running total</option>
+                            <option value="7">8. LEFT JOIN — Products never ordered</option>
+                            <option value="8">9. Top employees by spend</option>
+                            <option value="9">10. Pending orders value</option>
                         </select>
                     </div>
-                    <div class="metric-row">
-                        <button id="sql-run-btn" style="width:100%;margin-top:6px;background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.3);border-radius:8px;padding:6px;cursor:pointer;font-size:0.8rem;">▶ Run Query</button>
+
+                    <div class="sql-code-box" id="sql-code-box">
+                        <div class="sql-code-title">SQL</div>
+                        <pre class="sql-code" id="sql-preview">SELECT ...</pre>
                     </div>
-                    <pre id="sql-result" style="margin-top:8px;font-size:0.7rem;background:rgba(0,0,0,0.3);border-radius:6px;padding:8px;max-height:180px;overflow-y:auto;white-space:pre-wrap;color:#aaaacc;"></pre>
+
+                    <div class="sql-bar">
+                        <button class="sql-btn" id="sql-run-btn">▶ Run Query</button>
+                        <span class="sql-row-count" id="sql-row-count"></span>
+                    </div>
+
+                    <div class="sql-loading" id="sql-loading">Running...</div>
+
+                    <div class="sql-results-box" id="sql-results-box">
+                        <table class="sql-table" id="sql-table">
+                            <thead id="sql-thead"></thead>
+                            <tbody id="sql-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="sql-explain-box" id="sql-explain-box">
+                        <div class="sql-code-title">EXPLAIN ANALYZE</div>
+                        <pre class="sql-explain" id="sql-explain"></pre>
+                    </div>
                 </div>
             </div>
 
@@ -156,7 +175,7 @@
                     <h2>Redis</h2>
                 </div>
                 <div class="card-body">
-                    <p class="host">srv3.privatbank.local</p>
+                    <p class="host">redis.privatbank.local</p>
                     <p class="ip">192.168.200.13</p>
                     <p class="status-text" id="redis-status">Checking...</p>
 

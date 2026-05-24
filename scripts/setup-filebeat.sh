@@ -101,14 +101,14 @@ if [[ "$HOSTNAME" == "dns" ]]; then
 DNS
 fi
 
-if [[ "$HOSTNAME" == "srv3" ]]; then
+if [[ "$HOSTNAME" == "redis" ]]; then
   cat >> /etc/filebeat/filebeat.yml << 'SRV'
   - type: log
     enabled: true
     paths:
       - /var/log/redis-api.log
     fields:
-      host: srv3
+      host: redis
       service: redis
 SRV
 fi

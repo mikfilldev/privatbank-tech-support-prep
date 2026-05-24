@@ -38,7 +38,7 @@ $TTL 86400
 dns     IN  A   192.168.200.5
 web1    IN  A   192.168.200.11
 db1     IN  A   192.168.200.12
-srv3    IN  A   192.168.200.13
+redis   IN  A   192.168.200.13
 elk     IN  A   192.168.200.14
 grafana IN  A   192.168.200.15
 zabbix  IN  A   192.168.200.16
@@ -57,7 +57,7 @@ $TTL 86400
 5   IN  PTR dns.privatbank.local.
 11  IN  PTR web1.privatbank.local.
 12  IN  PTR db1.privatbank.local.
-13  IN  PTR srv3.privatbank.local.
+13  IN  PTR redis.privatbank.local.
 14  IN  PTR elk.privatbank.local.
 15  IN  PTR grafana.privatbank.local.
 16  IN  PTR zabbix.privatbank.local.
@@ -136,8 +136,22 @@ http.server.HTTPServer(("0.0.0.0", 8083), DnsMetricsHandler).serve_forever()
 PYEOF
 
 chmod +x /usr/local/bin/metrics-dns.py
-pkill -f metrics-dns.py 2>/dev/null || true; sleep 1
-nohup python3 /usr/local/bin/metrics-dns.py < /dev/null > /var/log/metrics-dns.log 2>&1 & disown
+cat > /etc/systemd/system/metrics-dns.service << UNIT
+[Unit]
+Description=DNS Metrics Server
+After=network.target named.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/metrics-dns.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl daemon-reload
+systemctl enable --now metrics-dns
 
 systemctl enable --now named
 

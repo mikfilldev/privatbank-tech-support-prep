@@ -8,7 +8,7 @@
 | `dns` | 192.168.200.5 | DNS-сервер | BIND, Oracle Linux 10 |
 | `web1` | 192.168.200.11 | Веб-сервер | nginx, dashboard, metrics |
 | `db1` | 192.168.200.12 | PostgreSQL | SQL (labdb + practice_db), health/metrics API |
-| `srv3` | 192.168.200.13 | NoSQL | Redis (sessions, cache, rate-limiting, leaderboard) |
+| `redis` | 192.168.200.13 | NoSQL | Redis (sessions, cache, rate-limiting, leaderboard) |
 | `elk` | 192.168.200.14 | Логування | Elasticsearch + Kibana + Filebeat |
 | `grafana` | 192.168.200.15 | BI/Monitoring | Grafana (дашборди з PostgreSQL) |
 | `zabbix` | 192.168.200.16 | Monitoring | Zabbix server + frontend + agent |
@@ -86,7 +86,7 @@ vagrant-lab-practice/
 
 **Query API:** `https://web1.privatbank.local/api/sql-practice/query/0..9`
 
-### NoSQL (srv3 / Redis)
+### NoSQL (redis / Redis)
 
 Типи даних у Redis:
 - **String** — сесії, лічильники (page_views, api_calls)
@@ -102,7 +102,7 @@ vagrant-lab-practice/
 
 - Elasticsearch 8.17.3 — зберігання та пошук логів
 - Kibana — візуалізація (https://web1.privatbank.local/api/kibana/)
-- Filebeat на web1, db1, dns, srv3, grafana, zabbix — збір системних логів + логів сервісів
+- Filebeat на web1, db1, dns, redis, grafana, zabbix — збір системних логів + логів сервісів
 
 ### Grafana (grafana)
 
@@ -140,7 +140,7 @@ vagrant up
 192.168.200.5  dns.privatbank.local
 192.168.200.11 web1.privatbank.local
 192.168.200.12 db1.privatbank.local
-192.168.200.13 srv3.privatbank.local
+192.168.200.13 redis.privatbank.local
 192.168.200.14 elk.privatbank.local
 192.168.200.15 grafana.privatbank.local
 192.168.200.16 zabbix.privatbank.local

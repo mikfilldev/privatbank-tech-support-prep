@@ -89,7 +89,7 @@ server {
     }
 
     location /api/kibana/ {
-        proxy_pass http://192.168.200.14:5601/;
+        proxy_pass http://192.168.200.14:5601;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
@@ -98,6 +98,7 @@ server {
         proxy_pass http://192.168.200.16/zabbix/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_cookie_path /zabbix /api/zabbix;
     }
 }
 NGINX
@@ -159,8 +160,22 @@ http.server.HTTPServer(("127.0.0.1", 8082), WebMetricsHandler).serve_forever()
 PYEOF
 
 chmod +x /usr/local/bin/metrics-web.py
-pkill -f metrics-web.py 2>/dev/null || true; sleep 1
-nohup python3 /usr/local/bin/metrics-web.py < /dev/null > /var/log/metrics-web.log 2>&1 & disown
+cat > /etc/systemd/system/metrics-web.service << UNIT
+[Unit]
+Description=Web Metrics Server
+After=network.target nginx.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/metrics-web.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl daemon-reload
+systemctl enable --now metrics-web
 
 cp -r /vagrant/web/* /var/www/html/
 

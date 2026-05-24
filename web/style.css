@@ -182,3 +182,145 @@ footer {
     font-size: 0.8rem;
     color: #6666aa;
 }
+
+/* ─── SQL Card ─── */
+.card-sql {
+    grid-column: 1 / -1;
+    max-width: 100%;
+}
+
+.sql-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+}
+
+.sql-select {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    color: #e0e0e0;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+.sql-select option { background: #1e1e2e; color: #e0e0e0; }
+
+.sql-code-box {
+    margin-top: 0.6rem;
+    background: rgba(0,0,0,0.35);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.sql-code-title {
+    padding: 4px 10px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.sql-code {
+    padding: 10px;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: #a8edea;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+    min-height: 40px;
+    max-height: 140px;
+    overflow-y: auto;
+}
+
+.sql-btn {
+    flex: 1;
+    background: rgba(74,222,128,0.12);
+    color: #4ade80;
+    border: 1px solid rgba(74,222,128,0.25);
+    border-radius: 8px;
+    padding: 7px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.sql-btn:hover { background: rgba(74,222,128,0.22); }
+.sql-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.sql-row-count {
+    font-size: 0.7rem;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.sql-loading {
+    display: none;
+    margin-top: 0.5rem;
+    padding: 8px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #fbbf24;
+    background: rgba(251,191,36,0.08);
+    border-radius: 6px;
+}
+
+.sql-results-box {
+    margin-top: 0.6rem;
+    max-height: 220px;
+    overflow: auto;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(0,0,0,0.2);
+}
+
+.sql-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.72rem;
+}
+.sql-table th {
+    background: rgba(255,255,255,0.06);
+    color: #a8edea;
+    padding: 6px 10px;
+    text-align: left;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.sql-table td {
+    padding: 4px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: #ccccee;
+}
+.sql-table tr:hover td {
+    background: rgba(255,255,255,0.04);
+}
+
+.sql-explain-box {
+    display: none;
+    margin-top: 0.5rem;
+    background: rgba(0,0,0,0.35);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.sql-explain {
+    padding: 10px;
+    font-size: 0.68rem;
+    line-height: 1.5;
+    color: #fbbf24;
+    white-space: pre-wrap;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    max-height: 120px;
+    overflow-y: auto;
+}
