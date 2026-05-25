@@ -6,10 +6,8 @@ export NEEDRESTART_MODE=a
 
 SQL_REF="/usr/local/share/sql-practice"
 
-# ─── Create practice database ───
-sudo -u postgres psql <<SQL
-CREATE DATABASE practice_db;
-\c practice_db
+# ─── Create tables in labdb ───
+sudo -u postgres psql -d labdb <<SQL
 
 -- Departments
 CREATE TABLE departments (
@@ -120,10 +118,10 @@ INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES
 (12, 5,  2,  399.99);
 SQL
 
-echo "practice_db created with tables: departments, employees, products, orders, order_items"
+echo "Tables created in labdb: departments, employees, products, orders, order_items"
 
 # ─── Indexes ───
-sudo -u postgres psql -d practice_db <<SQL
+sudo -u postgres psql -d labdb <<SQL
 CREATE INDEX idx_employees_dept ON employees(department_id);
 CREATE INDEX idx_orders_employee ON orders(employee_id);
 CREATE INDEX idx_order_items_order ON order_items(order_id);
@@ -135,24 +133,12 @@ SQL
 
 echo "Indexes created and analyzed"
 
-# ─── Grant practice_db access to labuser ───
-sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE practice_db TO labuser;"
-sudo -u postgres psql -d practice_db -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO labuser;"
-sudo -u postgres psql -d practice_db -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO labuser;"
-
-# ─── Add pg_hba entry for practice_db ───
-PG_HBA=$(find /etc/postgresql -name pg_hba.conf | head -1)
-if ! grep -q "practice_db.*labuser" "$PG_HBA" 2>/dev/null; then
-    echo "host practice_db labuser 192.168.200.0/24 md5" >> "$PG_HBA"
-    systemctl reload postgresql
-fi
-
 # ─── Reference SQL queries file ───
 mkdir -p "$SQL_REF"
 
 cat > "$SQL_REF/queries.sql" << 'QUERIES'
 -- ==========================================
--- SQL Practice Reference — practice_db
+-- SQL Practice Reference — labdb
 -- ==========================================
 
 -- 1. Basic SELECT with JOIN
@@ -236,7 +222,7 @@ cat > /usr/local/bin/sql-practice-server.py << 'PYEOF'
 #!/usr/bin/env python3
 import http.server, json, subprocess, os, shutil
 
-DB = "practice_db"
+DB = "labdb"
 QUERIES_FILE = "/usr/local/share/sql-practice/queries.sql"
 
 class SQLPracticeHandler(http.server.BaseHTTPRequestHandler):
@@ -352,4 +338,4 @@ UNIT
 systemctl daemon-reload
 systemctl enable --now sql-practice
 
-echo "SQL practice ready: db=practice_db, api=127.0.0.1:8082"
+echo "SQL practice ready: db=labdb, api=127.0.0.1:8082"

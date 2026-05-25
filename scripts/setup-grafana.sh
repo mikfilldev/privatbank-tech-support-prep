@@ -63,24 +63,6 @@ curl -s -X POST http://\${AUTH}@localhost:3000/api/datasources \
     "secureJsonData":{"password":"changeme"}
   }'
 
-# Create practice_db datasource
-curl -s -X POST http://\${AUTH}@localhost:3000/api/datasources \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name":"PostgreSQL (practice_db)",
-    "type":"postgres",
-    "url":"192.168.200.12:5432",
-    "access":"proxy",
-    "user":"postgres",
-    "database":"practice_db",
-    "basicAuth":false,
-    "jsonData":{
-      "sslmode":"disable",
-      "postgresVersion":1600
-    },
-    "secureJsonData":{"password":""}
-  }'
-
 # Create a dashboard showing system metrics
 curl -s -X POST http://\${AUTH}@localhost:3000/api/dashboards/db \
   -H "Content-Type: application/json" \
@@ -123,7 +105,7 @@ curl -s -X POST http://\${AUTH}@localhost:3000/api/dashboards/db \
         {
           "title": "Departments by Budget",
           "type": "barchart",
-          "datasource": "PostgreSQL (practice_db)",
+          "datasource": "PostgreSQL (labdb)",
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
           "targets": [{
             "rawSql": "SELECT name, budget FROM departments ORDER BY budget DESC;",
@@ -133,7 +115,7 @@ curl -s -X POST http://\${AUTH}@localhost:3000/api/dashboards/db \
         {
           "title": "Employees per Department",
           "type": "piechart",
-          "datasource": "PostgreSQL (practice_db)",
+          "datasource": "PostgreSQL (labdb)",
           "gridPos": {"h": 8, "w": 6, "x": 0, "y": 16},
           "targets": [{
             "rawSql": "SELECT d.name, COUNT(e.id) AS cnt FROM departments d LEFT JOIN employees e ON e.department_id = d.id GROUP BY d.name ORDER BY cnt DESC;",
@@ -143,7 +125,7 @@ curl -s -X POST http://\${AUTH}@localhost:3000/api/dashboards/db \
         {
           "title": "Salary Distribution",
           "type": "histogram",
-          "datasource": "PostgreSQL (practice_db)",
+          "datasource": "PostgreSQL (labdb)",
           "gridPos": {"h": 8, "w": 6, "x": 6, "y": 16},
           "targets": [{
             "rawSql": "SELECT salary FROM employees;",
@@ -153,7 +135,7 @@ curl -s -X POST http://\${AUTH}@localhost:3000/api/dashboards/db \
         {
           "title": "Recent Orders",
           "type": "table",
-          "datasource": "PostgreSQL (practice_db)",
+          "datasource": "PostgreSQL (labdb)",
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
           "targets": [{
             "rawSql": "SELECT o.id, e.name AS employee, o.order_date::date, o.status, SUM(oi.quantity * oi.unit_price)::numeric(10,2) AS total FROM orders o JOIN employees e ON e.id = o.employee_id JOIN order_items oi ON oi.order_id = o.id GROUP BY o.id, e.name, o.order_date, o.status ORDER BY o.order_date DESC LIMIT 20;",

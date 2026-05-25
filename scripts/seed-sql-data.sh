@@ -18,4 +18,4 @@ uv sync --project /opt/sql-seed -q
 
 # Generate and execute seed SQL
 cp /vagrant/scripts/seed-sql-data.py /tmp/seed-sql-data.py
-uv run --project /opt/sql-seed /tmp/seed-sql-data.py | sudo -u postgres psql -d practice_db
+uv run --project /opt/sql-seed /tmp/seed-sql-data.py | sudo -u postgres psql -d labdb

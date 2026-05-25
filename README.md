@@ -7,7 +7,7 @@
 |----|----|------|------------|
 | `dns` | 192.168.200.5 | DNS-сервер | BIND, Oracle Linux 10 |
 | `web1` | 192.168.200.11 | Веб-сервер | nginx, dashboard, metrics, reverse proxy |
-| `db1` | 192.168.200.12 | PostgreSQL | SQL (labdb + practice_db), health/metrics API |
+| `db1` | 192.168.200.12 | PostgreSQL | SQL (labdb), health/metrics API |
 | `redis` | 192.168.200.13 | NoSQL | Redis (sessions, cache, rate-limiting, leaderboard) |
 | `elk` | 192.168.200.14 | Логування | Elasticsearch + Kibana + Filebeat |
 | `grafana` | 192.168.200.15 | BI/Monitoring | Grafana (дашборди з PostgreSQL) |
@@ -33,7 +33,7 @@ vagrant-lab-practice/
 │   ├── setup-nginx.sh       # nginx + SSL + reverse proxy config
 │   ├── setup-web-metrics.sh # Web metrics daemon (CPU/RAM/disk/inodes/nginx stats)
 │   ├── setup-postgres.sh    # PostgreSQL (labdb, labuser) + health/metrics daemons
-│   ├── setup-sql-practice.sh # practice_db (5 tables, indexes, queries) + SQL API
+│   ├── setup-sql-practice.sh # labdb (5 tables, indexes, queries) + SQL API
 │   ├── setup-redis.sh       # Redis + seed data + health API + practice API
 │   ├── setup-elk.sh         # Elasticsearch 8.17.3 + Kibana
 │   ├── setup-filebeat.sh    # Filebeat log collector (every VM)
@@ -112,7 +112,7 @@ All internal services proxied through nginx on web1 (same-origin, no mixed conte
 
 ## Що демонструє кожен компонент
 
-### SQL (db1 / practice_db)
+### SQL (db1 / labdb)
 
 5 таблиць: `departments`, `employees`, `products`, `orders`, `order_items`.
 
@@ -229,7 +229,7 @@ vagrant ssh elk -c "systemctl status elk-metrics --no-pager"
 |-------|-------|
 | Host | `192.168.200.12` |
 | Port | `5432` |
-| Database | `labdb` or `practice_db` |
+| Database | `labdb` |
 | User | `labuser` |
 | Password | `cat secrets/pg_password.txt` |
 | SSL | disable (`sslmode=disable`) |
