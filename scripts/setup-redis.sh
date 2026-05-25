@@ -193,7 +193,7 @@ UNIT
 systemctl daemon-reload
 systemctl enable --now redis-api
 
-# ─── Redis Practice API Server (port 8081) ───
+# ─── Redis Practice API Server (port 8085) ───
 REDIS_REF="/usr/local/share/redis-practice"
 mkdir -p "$REDIS_REF"
 
@@ -280,6 +280,12 @@ def parse_commands():
             cmds.append({"title": title, "command": "".join(buf).strip()})
     return cmds
 
+def parse_cmd(line):
+    parts = [p.strip('"\'') for p in re.findall(r'''(?: [^\s"']+ | " [^"]* " | ' [^']* ' )''', line, re.VERBOSE)]
+    if not parts:
+        return None, []
+    return parts[0].upper(), parts[1:]
+
 def run_cmd(cmd_str):
     try:
         r = get_redis()
@@ -287,18 +293,28 @@ def run_cmd(cmd_str):
         return {"type": "error", "content": f"Cannot connect to Redis: {e}"}
     if DANGEROUS.match(cmd_str.strip()):
         return {"type": "error", "content": "Command blocked for safety"}
-    parts = [p.strip('"\'') for p in re.findall(r'''(?: [^\s"']+ | " [^"]* " | ' [^']* ' )''', cmd_str, re.VERBOSE)]
-    if not parts:
+    results = []
+    for line in cmd_str.strip().split("\n"):
+        line = line.strip()
+        if not line or line.startswith("#") or line.startswith(";"):
+            continue
+        cmd, args = parse_cmd(line)
+        if cmd is None:
+            continue
+        try:
+            result = r.execute_command(cmd, *args)
+            if isinstance(result, bytes):
+                result = result.decode()
+            elif isinstance(result, list):
+                result = [r.decode() if isinstance(r, bytes) else r for r in result]
+            elif isinstance(result, set):
+                result = [r.decode() if isinstance(r, bytes) else r for r in result]
+            results.append({cmd: result})
+        except Exception as e:
+            results.append({cmd: str(e)})
+    if not results:
         return {"type": "error", "content": "Empty command"}
-    cmd = parts[0].upper()
-    args = parts[1:]
-    if DANGEROUS.match(cmd):
-        return {"type": "error", "content": "Command blocked for safety"}
-    try:
-        result = r.execute_command(cmd, *args)
-    except Exception as e:
-        return {"type": "error", "content": str(e)}
-    return {"type": "result", "content": result}
+    return {"type": "result", "content": results if len(results) > 1 else results[0]}
 
 def format_result(result):
     if result["type"] == "error":
@@ -309,14 +325,7 @@ def format_result(result):
             parsed = json.loads(v)
             return json.dumps(parsed, indent=2, ensure_ascii=False)
         except (json.JSONDecodeError, TypeError):
-            return v
-    if isinstance(v, bytes):
-        v = v.decode()
-        try:
-            parsed = json.loads(v)
-            return json.dumps(parsed, indent=2, ensure_ascii=False)
-        except (json.JSONDecodeError, TypeError):
-            return v
+            return json.dumps(v, indent=2, ensure_ascii=False)
     return json.dumps(v, indent=2, default=str, ensure_ascii=False)
 
 class RedisPracticeHandler(http.server.BaseHTTPRequestHandler):
@@ -383,7 +392,7 @@ class RedisPracticeHandler(http.server.BaseHTTPRequestHandler):
 
     def log_message(self, *a): pass
 
-http.server.HTTPServer(("0.0.0.0", 8081), RedisPracticeHandler).serve_forever()
+http.server.HTTPServer(("0.0.0.0", 8085), RedisPracticeHandler).serve_forever()
 PYEOF
 
 chmod +x /usr/local/bin/redis-practice-server.py
@@ -394,10 +403,10 @@ After=network.target redis-server.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /usr/local/bin/redis-practice-server.py
+ExecStart=/usr/local/bin/uv run --project /opt/redis-venv /usr/local/bin/redis-practice-server.py
 Restart=always
 RestartSec=5
-Environment=REDIS_PASSWORD=${REDIS_PASSWORD}
+Environment=UV_PROJECT=/opt/redis-venv
 
 [Install]
 WantedBy=multi-user.target
@@ -405,4 +414,4 @@ UNIT
 systemctl daemon-reload
 systemctl enable --now redis-practice
 
-echo "Redis ready: 192.168.200.13:6379 (password in secrets/redis_password.txt), API on :8080, Practice API on :8081"
+echo "Redis ready: 192.168.200.13:6379 (password in secrets/redis_password.txt), API on :8080, Practice API on :8085"

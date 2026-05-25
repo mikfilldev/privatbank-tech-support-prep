@@ -89,7 +89,7 @@ server {
     }
 
     location /api/redis-practice/ {
-        proxy_pass http://192.168.200.13:8081/;
+        proxy_pass http://192.168.200.13:8085/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
