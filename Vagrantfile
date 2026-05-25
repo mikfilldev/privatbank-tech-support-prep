@@ -25,6 +25,7 @@ Vagrant.configure("2") do |config|
     end
     web.vm.provision "shell", path: "scripts/setup-dns.sh"
     web.vm.provision "shell", path: "scripts/setup-nginx.sh"
+    web.vm.provision "shell", path: "scripts/setup-web-metrics.sh"
     web.vm.provision "shell", path: "scripts/setup-filebeat.sh"
   end
 
