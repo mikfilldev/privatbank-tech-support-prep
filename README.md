@@ -141,7 +141,7 @@ Redis з різними типами даних (strings, hashes, lists, sets, s
 
 ### Grafana (grafana)
 
-- PostgreSQL datasources (`labdb` + `practice_db`)
+- PostgreSQL datasource (`labdb`)
 - 6-panel dashboard (DB connections, database size, budget, employees, salary, orders)
 - Anonymous access (Viewer role)
 
