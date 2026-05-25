@@ -193,4 +193,216 @@ UNIT
 systemctl daemon-reload
 systemctl enable --now redis-api
 
-echo "Redis ready: 192.168.200.13:6379 (password in secrets/redis_password.txt), API on :8080"
+# ─── Redis Practice API Server (port 8081) ───
+REDIS_REF="/usr/local/share/redis-practice"
+mkdir -p "$REDIS_REF"
+
+cat > "$REDIS_REF/commands.txt" << 'CMDS'
+-- 1. GET / SET — basic key-value
+GET session:user:alice
+SET test:hello "world"
+GET test:hello
+DEL test:hello
+
+-- 2. HSET / HGET / HGETALL — hashes
+HGETALL user:1
+HGET user:1 name
+HSET user:1 phone "+380501234567"
+HGETALL user:1
+
+-- 3. LPUSH / LRANGE / LLEN — lists
+LRANGE recent:events 0 4
+LLEN recent:events
+
+-- 4. SADD / SMEMBERS / SISMEMBER — sets
+SMEMBERS online:users
+SISMEMBER online:users alice
+SISMEMBER online:users frank
+
+-- 5. ZADD / ZRANGE / ZREVRANGE — sorted sets
+ZRANGE leaderboard:scores 0 -1 WITHSCORES
+ZREVRANGE leaderboard:scores 0 2 WITHSCORES
+
+-- 6. KEYS / TYPE / EXISTS — introspection
+KEYS session:*
+TYPE session:user:alice
+TYPE leaderboard:scores
+EXISTS cache:dept_budgets
+
+-- 7. TTL / EXPIRE — expiry
+TTL cache:dept_budgets
+SET test:temp "will be deleted"
+EXPIRE test:temp 5
+TTL test:temp
+
+-- 8. INCR / DECR — atomic counters
+GET counter:page_views
+INCR counter:page_views
+INCRBY counter:page_views 10
+GET counter:page_views
+
+-- 9. INFO — server statistics (read-only)
+INFO server
+INFO memory
+INFO keyspace
+
+-- 10. RANDOMKEY / DBSIZE / CLIENT LIST
+RANDOMKEY
+DBSIZE
+CLIENT LIST
+CMDS
+
+cat > /usr/local/bin/redis-practice-server.py << PYEOF
+#!/usr/bin/env python3
+import http.server, json, redis, os, re
+
+REDIS_PASSWORD = '${REDIS_PASSWORD}'
+CMDS_FILE = "/usr/local/share/redis-practice/commands.txt"
+DANGEROUS = re.compile(r"^(FLUSHALL|FLUSHDB|CONFIG|SAVE|BGSAVE|BGREWRITEAOF|SHUTDOWN|SLAVEOF|REPLICAOF|DEBUG|CLUSTER|MONITOR|MIGRATE|RESTORE|REPLACE|SCRIPT\s+KILL)\b", re.I)
+
+def get_redis():
+    return redis.Redis(host='127.0.0.1', port=6379, db=0, socket_timeout=5, password=REDIS_PASSWORD)
+
+def parse_commands():
+    cmds = []
+    with open(CMDS_FILE) as f:
+        buf = []
+        title = ""
+        for line in f:
+            if line.startswith("-- "):
+                if buf:
+                    cmds.append({"title": title, "command": "".join(buf).strip()})
+                    buf = []
+                title = line.lstrip("-- ").strip()
+            else:
+                buf.append(line)
+        if buf:
+            cmds.append({"title": title, "command": "".join(buf).strip()})
+    return cmds
+
+def run_cmd(cmd_str):
+    try:
+        r = get_redis()
+    except Exception as e:
+        return {"type": "error", "content": f"Cannot connect to Redis: {e}"}
+    if DANGEROUS.match(cmd_str.strip()):
+        return {"type": "error", "content": "Command blocked for safety"}
+    parts = [p.strip('"\'') for p in re.findall(r'''(?: [^\s"']+ | " [^"]* " | ' [^']* ' )''', cmd_str, re.VERBOSE)]
+    if not parts:
+        return {"type": "error", "content": "Empty command"}
+    cmd = parts[0].upper()
+    args = parts[1:]
+    if DANGEROUS.match(cmd):
+        return {"type": "error", "content": "Command blocked for safety"}
+    try:
+        result = r.execute_command(cmd, *args)
+    except Exception as e:
+        return {"type": "error", "content": str(e)}
+    return {"type": "result", "content": result}
+
+def format_result(result):
+    if result["type"] == "error":
+        return result["content"]
+    v = result["content"]
+    if isinstance(v, str):
+        try:
+            parsed = json.loads(v)
+            return json.dumps(parsed, indent=2, ensure_ascii=False)
+        except (json.JSONDecodeError, TypeError):
+            return v
+    if isinstance(v, bytes):
+        v = v.decode()
+        try:
+            parsed = json.loads(v)
+            return json.dumps(parsed, indent=2, ensure_ascii=False)
+        except (json.JSONDecodeError, TypeError):
+            return v
+    return json.dumps(v, indent=2, default=str, ensure_ascii=False)
+
+class RedisPracticeHandler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == "/":
+            cmds = parse_commands()
+            self.send_json({"status": "ok", "commands_count": len(cmds)})
+
+        elif self.path.startswith("/command/"):
+            n_str = self.path.split("/command/")[-1]
+            if not n_str.isdigit():
+                self.send_error(400, "Invalid command number")
+                return
+            n = int(n_str)
+            cmds = parse_commands()
+            if n < 0 or n >= len(cmds):
+                self.send_error(404, "Command not found")
+                return
+            c = cmds[n]
+            result = run_cmd(c["command"])
+            self.send_json({
+                "title": c["title"],
+                "command": c["command"],
+                "result": format_result(result),
+                "result_type": result["type"],
+            })
+
+        elif self.path == "/run":
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length).decode() if length else "{}"
+            try:
+                params = json.loads(body)
+                cmd_str = params.get("command", "").strip()
+                if not cmd_str:
+                    self.send_error(400, "Empty command")
+                    return
+                result = run_cmd(cmd_str)
+                self.send_json({
+                    "command": cmd_str,
+                    "result": format_result(result),
+                    "result_type": result["type"],
+                })
+            except Exception as e:
+                self.send_error(400, str(e))
+
+        else:
+            self.send_error(404)
+
+    def do_POST(self):
+        if self.path == "/run":
+            self.do_GET()
+
+    def send_json(self, data):
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps(data, default=str).encode())
+
+    def send_error(self, code, msg):
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps({"error": msg}).encode())
+
+    def log_message(self, *a): pass
+
+http.server.HTTPServer(("0.0.0.0", 8081), RedisPracticeHandler).serve_forever()
+PYEOF
+
+chmod +x /usr/local/bin/redis-practice-server.py
+cat > /etc/systemd/system/redis-practice.service << UNIT
+[Unit]
+Description=Redis Practice API Server
+After=network.target redis-server.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/redis-practice-server.py
+Restart=always
+RestartSec=5
+Environment=REDIS_PASSWORD=${REDIS_PASSWORD}
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl daemon-reload
+systemctl enable --now redis-practice
+
+echo "Redis ready: 192.168.200.13:6379 (password in secrets/redis_password.txt), API on :8080, Practice API on :8081"

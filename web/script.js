@@ -244,6 +244,125 @@ async function checkRedisMetrics() {
     applyMetrics('redis', d);
 }
 
+let _redisCmdCache = {};
+let _redisCustom = false;
+
+async function checkRedisPractice() {
+    try {
+        const res = await fetch('/api/redis-practice/', { signal: AbortSignal.timeout(5000) });
+        if (res.status !== 200) { setStatus('redis-practice', 'offline', 'Offline'); return; }
+        const d = await res.json();
+        setStatus('redis-practice', 'online', `${d.commands_count} commands`);
+        $('redis-practice-info').textContent = `${d.commands_count} examples`;
+    } catch { setStatus('redis-practice', 'offline', 'Offline'); }
+}
+
+async function fetchRedisCmdPreview() {
+    const sel = $('redis-cmd-select');
+    const preview = $('redis-cmd-preview');
+    const codeBox = $('redis-cmd-box');
+    const textarea = $('redis-textarea');
+
+    if (sel.value === 'custom') {
+        codeBox.style.display = 'none';
+        textarea.style.display = 'block';
+        _redisCustom = true;
+        return;
+    }
+    codeBox.style.display = 'block';
+    textarea.style.display = 'none';
+    _redisCustom = false;
+
+    const n = parseInt(sel.value);
+    if (_redisCmdCache[n]) {
+        preview.textContent = _redisCmdCache[n].command;
+        return;
+    }
+    try {
+        const res = await fetch(`/api/redis-practice/command/${n}`, { signal: AbortSignal.timeout(10000) });
+        if (res.status !== 200) return;
+        const d = await res.json();
+        _redisCmdCache[n] = d;
+        preview.textContent = d.command;
+    } catch {}
+}
+
+async function runRedisCommand() {
+    const btn = $('redis-run-btn');
+    const loading = $('redis-loading');
+    const resultEl = $('redis-result');
+    const rowCount = $('redis-row-count');
+
+    btn.textContent = '⏳';
+    btn.disabled = true;
+    loading.style.display = 'block';
+    resultEl.textContent = '';
+    rowCount.textContent = '';
+
+    try {
+        let command;
+        if (_redisCustom) {
+            command = $('redis-textarea').value.trim();
+            if (!command) throw new Error('Empty command');
+        } else {
+            const n = parseInt($('redis-cmd-select').value);
+            const d = _redisCmdCache[n] || await (await fetch(`/api/redis-practice/command/${n}`, { signal: AbortSignal.timeout(10000) })).json();
+            _redisCmdCache[n] = d;
+            command = d.command;
+        }
+
+        const res = await fetch('/api/redis-practice/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ command }),
+            signal: AbortSignal.timeout(10000),
+        });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.error || `HTTP ${res.status}`);
+        if (d.error) throw new Error(d.error);
+
+        renderRedisResult(d);
+    } catch(e) {
+        resultEl.textContent = `Error: ${e.message}`;
+        resultEl.style.color = '#f87171';
+    }
+    btn.textContent = '▶ Run Command';
+    btn.disabled = false;
+    loading.style.display = 'none';
+}
+
+function renderRedisResult(d) {
+    const resultEl = $('redis-result');
+    const rowCount = $('redis-row-count');
+    resultEl.style.color = '#a8edea';
+
+    if (d.result_type === 'error') {
+        resultEl.textContent = d.result;
+        resultEl.style.color = '#f87171';
+        return;
+    }
+
+    let label = '';
+    let text = '';
+    try {
+        const parsed = JSON.parse(d.result);
+        if (Array.isArray(parsed)) {
+            label = `${parsed.length} items`;
+            text = d.result;
+        } else if (typeof parsed === 'object' && parsed !== null) {
+            const keys = Object.keys(parsed);
+            label = `${keys.length} fields`;
+            text = d.result;
+        } else {
+            text = d.result;
+        }
+    } catch {
+        text = d.result;
+    }
+    resultEl.textContent = text;
+    if (label) rowCount.textContent = label;
+}
+
 async function checkElk() {
     try {
         const [esRes, kibanaRes] = await Promise.all([
@@ -291,7 +410,7 @@ async function checkAll() {
         } catch { setStatus(check.id, 'offline', 'Offline'); }
     }
 
-    await Promise.all([checkWebMetrics(), checkDbMetrics(), checkDnsMetrics(), checkSqlStatus(), checkGrafana(), checkRedis(), checkRedisMetrics(), checkElk(), checkElkMetrics(), checkZabbix()]);
+    await Promise.all([checkWebMetrics(), checkDbMetrics(), checkDnsMetrics(), checkSqlStatus(), checkGrafana(), checkRedis(), checkRedisMetrics(), checkRedisPractice(), checkElk(), checkElkMetrics(), checkZabbix()]);
 
     $('last-checked').textContent = now;
 }
@@ -302,3 +421,7 @@ setInterval(checkAll, 10000);
 $('sql-run-btn').addEventListener('click', runSqlQuery);
 $('sql-query-select').addEventListener('change', fetchSqlPreview);
 fetchSqlPreview();
+
+$('redis-run-btn').addEventListener('click', runRedisCommand);
+$('redis-cmd-select').addEventListener('change', fetchRedisCmdPreview);
+fetchRedisCmdPreview();

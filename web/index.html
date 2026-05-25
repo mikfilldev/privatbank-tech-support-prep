@@ -214,7 +214,51 @@ LIMIT 10</textarea>
                 </div>
             </div>
 
-            <div class="card" data-service="elk">
+            <div class="card card-sql" data-service="redis-practice">
+                <div class="card-header">
+                    <span class="indicator" id="redis-practice-indicator"></span>
+                    <h2>Redis Practice</h2>
+                </div>
+                <div class="card-body">
+                    <p class="host">redis.privatbank.local</p>
+                    <p class="ip" id="redis-practice-info">—</p>
+                    <p class="status-text" id="redis-practice-status">Checking...</p>
+
+                    <div class="sql-bar">
+                        <select id="redis-cmd-select" class="sql-select">
+                            <option value="0">1. GET/SET — basic key-value</option>
+                            <option value="1">2. HSET/HGET/HGETALL — hashes</option>
+                            <option value="2">3. LPUSH/LRANGE/LLEN — lists</option>
+                            <option value="3">4. SADD/SMEMBERS — sets</option>
+                            <option value="4">5. ZRANGE — sorted sets</option>
+                            <option value="5">6. KEYS/TYPE/EXISTS — introspection</option>
+                            <option value="6">7. TTL/EXPIRE — expiry</option>
+                            <option value="7">8. INCR/INCRBY — atomic counters</option>
+                            <option value="8">9. INFO — server stats</option>
+                            <option value="9">10. RANDOMKEY/DBSIZE/CLIENT LIST</option>
+                            <option value="custom">✏️ Custom command...</option>
+                        </select>
+                    </div>
+
+                    <div class="sql-code-box" id="redis-cmd-box">
+                        <div class="sql-code-title">Redis Command</div>
+                        <pre class="sql-code" id="redis-cmd-preview">—</pre>
+                    </div>
+
+                    <textarea class="sql-textarea" id="redis-textarea" style="display:none" rows="2" placeholder="Write your Redis command here...&#10;Examples: GET session:user:alice, SMEMBERS online:users" spellcheck="false">GET session:user:alice</textarea>
+
+                    <div class="sql-bar">
+                        <button class="sql-btn" id="redis-run-btn">▶ Run Command</button>
+                        <span class="sql-row-count" id="redis-row-count"></span>
+                    </div>
+
+                    <div class="sql-loading" id="redis-loading">Running...</div>
+
+                    <div class="sql-results-box" id="redis-results-box">
+                        <pre class="redis-result" id="redis-result">—</pre>
+                    </div>
+                </div>
+            </div>
                 <div class="card-header">
                     <span class="indicator" id="elk-indicator"></span>
                     <h2>ELK</h2>
