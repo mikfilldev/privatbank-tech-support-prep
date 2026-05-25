@@ -135,6 +135,18 @@ SQL
 
 echo "Indexes created and analyzed"
 
+# ─── Grant practice_db access to labuser ───
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE practice_db TO labuser;"
+sudo -u postgres psql -d practice_db -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO labuser;"
+sudo -u postgres psql -d practice_db -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO labuser;"
+
+# ─── Add pg_hba entry for practice_db ───
+PG_HBA=$(find /etc/postgresql -name pg_hba.conf | head -1)
+if ! grep -q "practice_db.*labuser" "$PG_HBA" 2>/dev/null; then
+    echo "host practice_db labuser 192.168.200.0/24 md5" >> "$PG_HBA"
+    systemctl reload postgresql
+fi
+
 # ─── Reference SQL queries file ───
 mkdir -p "$SQL_REF"
 
