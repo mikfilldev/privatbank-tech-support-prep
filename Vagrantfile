@@ -1,7 +1,9 @@
+require_relative 'lib/secrets'
+
 Vagrant.configure("2") do |config|
   config.vm.box = "bento/ubuntu-24.04"
 
-  pg_password = File.read("secrets/pg_password.txt").strip rescue "changeme"
+  pg_password = Secrets.fetch('pg_password')
 
   config.vm.define "dns" do |dns|
       dns.vm.box = "oraclelinux/10"
