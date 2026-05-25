@@ -152,6 +152,9 @@ Redis з різними типами даних (strings, hashes, lists, sets, s
 - Agent2 для самоконтролю
 - Веб-фронтенд: Apache + PHP
 
+> **NOTE:** Admin password hardcoded to `zabbix` (set via bcrypt hash with `SQL UPDATE`).  
+> Not stored in `secrets/zabbix_password.txt` — that file exists but is ignored by the provisioner.
+
 ---
 
 ## Debugging
