@@ -33,9 +33,8 @@ fi
 id -u elasticsearch &>/dev/null || useradd -m -s /bin/bash elasticsearch
 chown -R elasticsearch:elasticsearch /usr/share/elasticsearch
 
-# Configure ES
-mkdir -p /etc/elasticsearch
-cat > /etc/elasticsearch/elasticsearch.yml << 'ESYML'
+# Configure ES — write to ES home config (ES reads from $ES_HOME/config/ by default)
+cat > /usr/share/elasticsearch/config/elasticsearch.yml << 'ESYML'
 cluster.name: lab-cluster
 node.name: elk
 path.data: /var/lib/elasticsearch
@@ -44,10 +43,11 @@ network.host: 0.0.0.0
 http.port: 9200
 discovery.type: single-node
 xpack.security.enabled: false
+xpack.security.http.ssl.enabled: false
 ESYML
 
 mkdir -p /var/lib/elasticsearch /var/log/elasticsearch
-chown -R elasticsearch:elasticsearch /var/lib/elasticsearch /var/log/elasticsearch
+chown -R elasticsearch:elasticsearch /var/lib/elasticsearch /var/log/elasticsearch /usr/share/elasticsearch
 
 # systemd unit for ES
 cat > /etc/systemd/system/elasticsearch.service << 'ESUNIT'
@@ -134,6 +134,68 @@ KIBUNIT
 systemctl daemon-reload
 systemctl enable kibana
 systemctl start kibana
+
+# ─── Metrics server ───
+cat > /usr/local/bin/metrics-elk.py << 'PYEOF'
+#!/usr/bin/env python3
+import http.server, json, shutil, os
+
+class ElkMetricsHandler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        with open("/proc/meminfo") as f:
+            mem = dict(line.split(":") for line in f if ":" in line)
+        mem_total = int(mem["MemTotal"].strip().split()[0]) // 1024
+        mem_avail = int(mem["MemAvailable"].strip().split()[0]) // 1024
+        mem_pct = round((mem_total - mem_avail) / mem_total * 100, 1)
+
+        du = shutil.disk_usage("/")
+        disk_total = du.total // (1024**3)
+        disk_free = du.free // (1024**3)
+        disk_pct = round((du.total - du.free) / du.total * 100, 1)
+
+        st = os.statvfs("/")
+        inode_total = st.f_files
+        inode_free = st.f_ffree
+        inode_pct = round((inode_total - inode_free) / inode_total * 100, 1)
+
+        with open("/proc/loadavg") as f:
+            load = f.read().split()[:3]
+
+        uptime_seconds = float(open("/proc/uptime").read().split()[0])
+
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps({
+            "mem_total_mb": mem_total, "mem_avail_mb": mem_avail, "mem_used_pct": mem_pct,
+            "disk_total_gb": disk_total, "disk_free_gb": disk_free, "disk_used_pct": disk_pct,
+            "inode_pct": inode_pct, "inode_total": inode_total, "inode_free": inode_free,
+            "load_1m": float(load[0]), "load_5m": float(load[1]), "load_15m": float(load[2]),
+            "uptime_seconds": uptime_seconds,
+        }).encode())
+    def log_message(self, *a): pass
+
+http.server.HTTPServer(("0.0.0.0", 8083), ElkMetricsHandler).serve_forever()
+PYEOF
+
+chmod +x /usr/local/bin/metrics-elk.py
+cat > /etc/systemd/system/metrics-elk.service << UNIT
+[Unit]
+Description=ELK Metrics Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/metrics-elk.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now metrics-elk
 
 echo "ELK ready: ES=9200, Kibana=5601"
 echo "Wait 30s for ES to start, then configure Filebeat on other VMs"

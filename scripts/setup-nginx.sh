@@ -92,6 +92,14 @@ server {
         proxy_pass http://192.168.200.14:5601;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 300;
+        proxy_connect_timeout 30;
+    }
+
+    location /api/health/elk-metrics {
+        proxy_pass http://192.168.200.14:8083/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
     }
 
     location /api/zabbix/ {
@@ -105,7 +113,7 @@ NGINX
 
 cat > /usr/local/bin/metrics-web.py << 'PYEOF'
 #!/usr/bin/env python3
-import http.server, json, shutil, subprocess, urllib.request
+import http.server, json, shutil, subprocess, urllib.request, os
 
 class WebMetricsHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
@@ -119,6 +127,11 @@ class WebMetricsHandler(http.server.BaseHTTPRequestHandler):
         disk_total = du.total // (1024**3)
         disk_free = du.free // (1024**3)
         disk_pct = round((du.total - du.free) / du.total * 100, 1)
+
+        st = os.statvfs("/")
+        inode_total = st.f_files
+        inode_free = st.f_ffree
+        inode_pct = round((inode_total - inode_free) / inode_total * 100, 1)
 
         with open("/proc/loadavg") as f:
             load = f.read().split()[:3]
@@ -149,6 +162,8 @@ class WebMetricsHandler(http.server.BaseHTTPRequestHandler):
             "mem_used_pct": mem_pct,
             "disk_total_gb": disk_total, "disk_free_gb": disk_free,
             "disk_used_pct": disk_pct,
+            "inode_pct": inode_pct, "inode_total": inode_total,
+            "inode_free": inode_free,
             "load_1m": float(load[0]), "load_5m": float(load[1]),
             "load_15m": float(load[2]),
             "uptime_seconds": uptime_seconds,

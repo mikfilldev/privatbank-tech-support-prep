@@ -139,12 +139,17 @@ class RedisHandler(http.server.BaseHTTPRequestHandler):
             disk_total = du.total // (1024**3)
             disk_free = du.free // (1024**3)
             disk_pct = round((du.total - du.free) / du.total * 100, 1)
+            st = os.statvfs("/")
+            inode_total = st.f_files
+            inode_free = st.f_ffree
+            inode_pct = round((inode_total - inode_free) / inode_total * 100, 1)
             with open("/proc/loadavg") as f:
                 load = f.read().split()[:3]
             uptime_seconds = float(open("/proc/uptime").read().split()[0])
             self.send_json({
                 "mem_total_mb": mem_total, "mem_avail_mb": mem_avail, "mem_used_pct": mem_pct,
                 "disk_total_gb": disk_total, "disk_free_gb": disk_free, "disk_used_pct": disk_pct,
+                "inode_pct": inode_pct, "inode_total": inode_total, "inode_free": inode_free,
                 "load_1m": float(load[0]), "load_5m": float(load[1]), "load_15m": float(load[2]),
                 "uptime_seconds": uptime_seconds,
             })

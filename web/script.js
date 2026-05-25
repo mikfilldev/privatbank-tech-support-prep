@@ -40,7 +40,11 @@ function applyMetrics(prefix, d) {
     $(`${prefix}-ram-text`).textContent = `${d.mem_used_pct}% (${fmtMb(d.mem_total_mb - d.mem_avail_mb)}/${fmtMb(d.mem_total_mb)})`;
 
     setBar(`${prefix}-dsk-bar`, d.disk_used_pct);
-    $(`${prefix}-dsk-text`).textContent = `${d.disk_used_pct}% (${d.disk_total_gb - d.disk_free_gb}/${d.disk_total_gb}GB)`;
+    let dskText = `${d.disk_used_pct}% (${d.disk_total_gb - d.disk_free_gb}/${d.disk_total_gb}GB)`;
+    if (d.inode_pct !== undefined) {
+        dskText += ` · inodes ${d.inode_pct}%`;
+    }
+    $(`${prefix}-dsk-text`).textContent = dskText;
 
     $(`${prefix}-load-text`).textContent = `${d.load_1m}  ${d.load_5m}  ${d.load_15m}`;
     $(`${prefix}-uptime`).textContent = fmtUptime(d.uptime_seconds);
@@ -87,10 +91,25 @@ async function checkSqlStatus() {
 }
 
 let _sqlCache = {};
+let _sqlCustom = false;
 
 async function fetchSqlPreview() {
-    const n = parseInt($('sql-query-select').value);
+    const sel = $('sql-query-select');
     const preview = $('sql-preview');
+    const codeBox = $('sql-code-box');
+    const textarea = $('sql-textarea');
+
+    if (sel.value === 'custom') {
+        codeBox.style.display = 'none';
+        textarea.style.display = 'block';
+        _sqlCustom = true;
+        return;
+    }
+    codeBox.style.display = 'block';
+    textarea.style.display = 'none';
+    _sqlCustom = false;
+
+    const n = parseInt(sel.value);
     if (_sqlCache[n]) {
         preview.textContent = _sqlCache[n].query;
         return;
@@ -105,7 +124,6 @@ async function fetchSqlPreview() {
 }
 
 async function runSqlQuery() {
-    const n = parseInt($('sql-query-select').value);
     const btn = $('sql-run-btn');
     const loading = $('sql-loading');
     const thead = $('sql-thead');
@@ -124,44 +142,10 @@ async function runSqlQuery() {
     rowCount.textContent = '';
 
     try {
-        const d = _sqlCache[n] || await (await fetch(`/api/sql-practice/query/${n}`, { signal: AbortSignal.timeout(10000) })).json();
-        _sqlCache[n] = d;
-
-        // Results table
-        if (d.result && d.result.data && d.result.data.length > 0) {
-            // First row as header
-            const headerRow = d.result.data[0];
-            const dataRows = d.result.data.slice(1);
-
-            let h = '<tr>';
-            for (const col of headerRow) {
-                h += `<th>${escHtml(col)}</th>`;
-            }
-            h += '</tr>';
-            thead.innerHTML = h;
-
-            let b = '';
-            for (const row of dataRows) {
-                b += '<tr>';
-                for (const cell of row) {
-                    b += `<td>${escHtml(cell)}</td>`;
-                }
-                b += '</tr>';
-            }
-            tbody.innerHTML = b;
-            rowCount.textContent = `${dataRows.length} rows`;
-        } else if (d.result && d.result.data) {
-            rowCount.textContent = '0 rows';
-        }
-
-        // EXPLAIN
-        if (d.explain && d.explain.data && d.explain.data.length > 0) {
-            let x = '';
-            for (const row of d.explain.data) {
-                x += row.join(' ') + '\n';
-            }
-            explain.textContent = x;
-            explainBox.style.display = 'block';
+        if (_sqlCustom) {
+            await runCustomSqlQuery();
+        } else {
+            await runPredefinedSqlQuery();
         }
     } catch(e) {
         tbody.innerHTML = `<tr><td style="color:#f87171;text-align:center;padding:12px;">Error: ${e.message}</td></tr>`;
@@ -169,6 +153,72 @@ async function runSqlQuery() {
     btn.textContent = '▶ Run Query';
     btn.disabled = false;
     loading.style.display = 'none';
+}
+
+async function runPredefinedSqlQuery() {
+    const n = parseInt($('sql-query-select').value);
+    const d = _sqlCache[n] || await (await fetch(`/api/sql-practice/query/${n}`, { signal: AbortSignal.timeout(10000) })).json();
+    _sqlCache[n] = d;
+    renderSqlResults(d.result, d.explain);
+}
+
+async function runCustomSqlQuery() {
+    const sql = $('sql-textarea').value.trim();
+    if (!sql) throw new Error('Empty SQL query');
+
+    const res = await fetch('/api/sql-practice/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sql }),
+        signal: AbortSignal.timeout(10000),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.error || `HTTP ${res.status}`);
+    if (d.error) throw new Error(d.error);
+
+    renderSqlResults(d.result, null);
+}
+
+function renderSqlResults(result, explain) {
+    const thead = $('sql-thead');
+    const tbody = $('sql-tbody');
+    const explainEl = $('sql-explain');
+    const explainBox = $('sql-explain-box');
+    const rowCount = $('sql-row-count');
+
+    if (result && result.data && result.data.length > 0) {
+        const headerRow = result.data[0];
+        const dataRows = result.data.slice(1);
+
+        let h = '<tr>';
+        for (const col of headerRow) {
+            h += `<th>${escHtml(col)}</th>`;
+        }
+        h += '</tr>';
+        thead.innerHTML = h;
+
+        let b = '';
+        for (const row of dataRows) {
+            b += '<tr>';
+            for (const cell of row) {
+                b += `<td>${escHtml(cell)}</td>`;
+            }
+            b += '</tr>';
+        }
+        tbody.innerHTML = b;
+        rowCount.textContent = `${dataRows.length} rows`;
+    } else if (result && result.data) {
+        rowCount.textContent = '0 rows';
+    }
+
+    if (explain && explain.data && explain.data.length > 0) {
+        let x = '';
+        for (const row of explain.data) {
+            x += row.join(' ') + '\n';
+        }
+        explainEl.textContent = x;
+        explainBox.style.display = 'block';
+    }
 }
 
 function escHtml(s) {
@@ -207,6 +257,12 @@ async function checkElk() {
     } catch { setStatus('elk', 'offline', 'Offline'); $('elk-es-status').textContent = 'Offline'; }
 }
 
+async function checkElkMetrics() {
+    const d = await fetchMetrics('/api/health/elk-metrics');
+    if (!d) return;
+    applyMetrics('elk', d);
+}
+
 async function checkGrafana() {
     try {
         const res = await fetch('/api/grafana/api/health', { signal: AbortSignal.timeout(5000) });
@@ -235,7 +291,7 @@ async function checkAll() {
         } catch { setStatus(check.id, 'offline', 'Offline'); }
     }
 
-    await Promise.all([checkWebMetrics(), checkDbMetrics(), checkDnsMetrics(), checkSqlStatus(), checkGrafana(), checkRedis(), checkRedisMetrics(), checkElk(), checkZabbix()]);
+    await Promise.all([checkWebMetrics(), checkDbMetrics(), checkDnsMetrics(), checkSqlStatus(), checkGrafana(), checkRedis(), checkRedisMetrics(), checkElk(), checkElkMetrics(), checkZabbix()]);
 
     $('last-checked').textContent = now;
 }

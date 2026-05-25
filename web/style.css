@@ -240,6 +240,30 @@ footer {
     overflow-y: auto;
 }
 
+.sql-textarea {
+    display: none;
+    margin-top: 0.6rem;
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    color: #a8edea;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.78rem;
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+    line-height: 1.5;
+    resize: vertical;
+    box-sizing: border-box;
+    outline: none;
+}
+.sql-textarea:focus {
+    border-color: rgba(74,222,128,0.4);
+    box-shadow: 0 0 0 2px rgba(74,222,128,0.08);
+}
+.sql-textarea::placeholder {
+    color: rgba(255,255,255,0.25);
+}
+
 .sql-btn {
     flex: 1;
     background: rgba(74,222,128,0.12);

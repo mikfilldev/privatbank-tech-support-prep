@@ -140,6 +140,7 @@
                             <option value="7">8. LEFT JOIN — Products never ordered</option>
                             <option value="8">9. Top employees by spend</option>
                             <option value="9">10. Pending orders value</option>
+                            <option value="custom">✏️ Custom query...</option>
                         </select>
                     </div>
 
@@ -147,6 +148,11 @@
                         <div class="sql-code-title">SQL</div>
                         <pre class="sql-code" id="sql-preview">SELECT ...</pre>
                     </div>
+
+                    <textarea class="sql-textarea" id="sql-textarea" style="display:none" rows="4" placeholder="Write your SQL here...&#10;Only SELECT / WITH / EXPLAIN allowed" spellcheck="false">SELECT e.name, d.name AS department
+FROM employees e
+JOIN departments d ON e.department_id = d.id
+LIMIT 10</textarea>
 
                     <div class="sql-bar">
                         <button class="sql-btn" id="sql-run-btn">▶ Run Query</button>
@@ -217,6 +223,25 @@
                     <p class="host">elk.privatbank.local</p>
                     <p class="ip">192.168.200.14</p>
                     <p class="status-text" id="elk-status">Checking...</p>
+
+                    <div class="metric">
+                        <span class="metric-label">RAM</span>
+                        <div class="metric-bar"><div class="metric-fill" id="elk-ram-bar"></div></div>
+                        <span class="metric-value" id="elk-ram-text">—</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">DSK</span>
+                        <div class="metric-bar"><div class="metric-fill" id="elk-dsk-bar"></div></div>
+                        <span class="metric-value" id="elk-dsk-text">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">CPU</span>
+                        <span id="elk-load-text">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">UP</span>
+                        <span id="elk-uptime">—</span>
+                    </div>
                     <div class="metric-row" style="margin-top:4px;">
                         <span class="metric-label">ES</span>
                         <span id="elk-es-status" style="color:#aaaacc;">—</span>

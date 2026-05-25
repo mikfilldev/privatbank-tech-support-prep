@@ -5,7 +5,7 @@ export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 
 ZABBIX_VERSION="7.0"
-ZABBIX_PASSWORD=$(cat /vagrant/secrets/zabbix_password.txt 2>/dev/null || echo "zabbix")
+ZABBIX_PASSWORD="zabbix"
 
 # Install Zabbix repository
 wget -q "https://repo.zabbix.com/zabbix/${ZABBIX_VERSION}/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_7.0+ubuntu24.04_all.deb"
