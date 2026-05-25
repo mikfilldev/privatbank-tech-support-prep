@@ -74,6 +74,8 @@ vagrant up
 **Passwords:** stored in `secrets/*.txt`, auto-generated on first `vagrant up`.
 To view: `cat secrets/pg_password.txt`
 
+![Dashboard Screenshot](web/screenshot.png)
+
 ---
 
 ## Dashboard
